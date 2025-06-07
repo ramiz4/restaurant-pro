@@ -93,6 +93,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
               variant="ghost"
               size="sm"
               className="w-full justify-start text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+              onClick={() => (window.location.href = "/login")}
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
