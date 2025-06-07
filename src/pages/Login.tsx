@@ -34,13 +34,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { setCurrentUser } = useUser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate authentication
+    // Simulate authentication and set current user
     setTimeout(() => {
+      const user = getUserByEmail(formData.email);
+      setCurrentUser(user);
       setLoading(false);
       navigate("/dashboard");
     }, 1200);
@@ -85,6 +88,8 @@ export default function Login() {
     setFormData({ email, password: "demo123" });
     setLoading(true);
     setTimeout(() => {
+      const user = getUserByEmail(email);
+      setCurrentUser(user);
       setLoading(false);
       navigate("/dashboard");
     }, 1000);

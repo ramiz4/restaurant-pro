@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "./ThemeToggle";
+import { useUser } from "@/contexts/UserContext";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -32,6 +33,13 @@ const navigation = [
 
 export function RestaurantLayout({ children }: RestaurantLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { currentUser, logout } = useUser();
+
+  const handleSignOut = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -77,14 +85,22 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
           <div className="border-t border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center space-x-3 mb-3">
               <div className="h-8 w-8 rounded-full bg-orange-600 flex items-center justify-center">
-                <span className="text-sm font-medium text-white">EA</span>
+                <span className="text-sm font-medium text-white">
+                  {currentUser?.initials || "U"}
+                </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Emma Admin
+                  {currentUser?.name || "Unknown User"}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Administrator
+                <p
+                  className={cn(
+                    "text-xs font-medium",
+                    currentUser?.roleColor ||
+                      "text-gray-500 dark:text-gray-400",
+                  )}
+                >
+                  {currentUser?.role || "User"}
                 </p>
               </div>
               <ThemeToggle />
@@ -93,7 +109,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
               variant="ghost"
               size="sm"
               className="w-full justify-start text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-              onClick={() => (window.location.href = "/login")}
+              onClick={handleSignOut}
             >
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
