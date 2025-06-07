@@ -1,0 +1,207 @@
+import {
+  mockMenuItems,
+  mockOrders,
+  mockTables,
+  mockInventory,
+  mockUsers,
+  mockSalesData,
+  type MenuItem,
+  type Order,
+  type Table,
+  type InventoryItem,
+  type User,
+  type SalesReport,
+  type OrderItem,
+} from "./mock-data";
+
+// Simulate API delay
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export class RestaurantService {
+  // Orders
+  static async getOrders(): Promise<Order[]> {
+    await delay(300);
+    return [...mockOrders];
+  }
+
+  static async createOrder(
+    order: Omit<Order, "id" | "createdAt">,
+  ): Promise<Order> {
+    await delay(500);
+    const newOrder: Order = {
+      ...order,
+      id: `ORD-${String(mockOrders.length + 1).padStart(3, "0")}`,
+      createdAt: new Date(),
+    };
+    mockOrders.push(newOrder);
+    return newOrder;
+  }
+
+  static async updateOrderStatus(
+    orderId: string,
+    status: Order["status"],
+  ): Promise<Order> {
+    await delay(300);
+    const orderIndex = mockOrders.findIndex((order) => order.id === orderId);
+    if (orderIndex !== -1) {
+      mockOrders[orderIndex].status = status;
+      return mockOrders[orderIndex];
+    }
+    throw new Error("Order not found");
+  }
+
+  // Menu
+  static async getMenuItems(): Promise<MenuItem[]> {
+    await delay(200);
+    return [...mockMenuItems];
+  }
+
+  static async createMenuItem(item: Omit<MenuItem, "id">): Promise<MenuItem> {
+    await delay(400);
+    const newItem: MenuItem = {
+      ...item,
+      id: String(mockMenuItems.length + 1),
+    };
+    mockMenuItems.push(newItem);
+    return newItem;
+  }
+
+  static async updateMenuItem(
+    id: string,
+    updates: Partial<MenuItem>,
+  ): Promise<MenuItem> {
+    await delay(300);
+    const itemIndex = mockMenuItems.findIndex((item) => item.id === id);
+    if (itemIndex !== -1) {
+      mockMenuItems[itemIndex] = { ...mockMenuItems[itemIndex], ...updates };
+      return mockMenuItems[itemIndex];
+    }
+    throw new Error("Menu item not found");
+  }
+
+  static async deleteMenuItem(id: string): Promise<void> {
+    await delay(300);
+    const itemIndex = mockMenuItems.findIndex((item) => item.id === id);
+    if (itemIndex !== -1) {
+      mockMenuItems.splice(itemIndex, 1);
+    } else {
+      throw new Error("Menu item not found");
+    }
+  }
+
+  // Tables
+  static async getTables(): Promise<Table[]> {
+    await delay(200);
+    return [...mockTables];
+  }
+
+  static async updateTableStatus(
+    id: string,
+    status: Table["status"],
+    currentOrder?: string,
+  ): Promise<Table> {
+    await delay(300);
+    const tableIndex = mockTables.findIndex((table) => table.id === id);
+    if (tableIndex !== -1) {
+      mockTables[tableIndex].status = status;
+      if (currentOrder !== undefined) {
+        mockTables[tableIndex].currentOrder = currentOrder;
+      }
+      return mockTables[tableIndex];
+    }
+    throw new Error("Table not found");
+  }
+
+  // Inventory
+  static async getInventory(): Promise<InventoryItem[]> {
+    await delay(250);
+    return [...mockInventory];
+  }
+
+  static async updateInventoryStock(
+    id: string,
+    newStock: number,
+  ): Promise<InventoryItem> {
+    await delay(300);
+    const itemIndex = mockInventory.findIndex((item) => item.id === id);
+    if (itemIndex !== -1) {
+      mockInventory[itemIndex].currentStock = newStock;
+      mockInventory[itemIndex].lastRestocked = new Date();
+      return mockInventory[itemIndex];
+    }
+    throw new Error("Inventory item not found");
+  }
+
+  static async addInventoryItem(
+    item: Omit<InventoryItem, "id">,
+  ): Promise<InventoryItem> {
+    await delay(400);
+    const newItem: InventoryItem = {
+      ...item,
+      id: String(mockInventory.length + 1),
+    };
+    mockInventory.push(newItem);
+    return newItem;
+  }
+
+  // Users
+  static async getUsers(): Promise<User[]> {
+    await delay(200);
+    return [...mockUsers];
+  }
+
+  static async createUser(user: Omit<User, "id" | "createdAt">): Promise<User> {
+    await delay(400);
+    const newUser: User = {
+      ...user,
+      id: String(mockUsers.length + 1),
+      createdAt: new Date(),
+    };
+    mockUsers.push(newUser);
+    return newUser;
+  }
+
+  static async updateUser(id: string, updates: Partial<User>): Promise<User> {
+    await delay(300);
+    const userIndex = mockUsers.findIndex((user) => user.id === id);
+    if (userIndex !== -1) {
+      mockUsers[userIndex] = { ...mockUsers[userIndex], ...updates };
+      return mockUsers[userIndex];
+    }
+    throw new Error("User not found");
+  }
+
+  // Reports
+  static async getSalesReports(): Promise<SalesReport[]> {
+    await delay(400);
+    return [...mockSalesData];
+  }
+
+  static async getDashboardStats() {
+    await delay(300);
+    const activeOrders = mockOrders.filter((order) =>
+      ["pending", "preparing", "ready"].includes(order.status),
+    ).length;
+
+    const occupiedTables = mockTables.filter(
+      (table) => table.status === "occupied",
+    ).length;
+
+    const lowStockItems = mockInventory.filter(
+      (item) => item.currentStock <= item.minStock,
+    ).length;
+
+    const todaySales = mockSalesData[0]?.totalSales || 0;
+
+    return {
+      activeOrders,
+      occupiedTables,
+      totalTables: mockTables.length,
+      lowStockItems,
+      todaySales,
+      totalRevenue: mockSalesData.reduce((sum, day) => sum + day.totalSales, 0),
+    };
+  }
+}
+
+export default RestaurantService;
