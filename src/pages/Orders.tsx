@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { PaymentDialog } from "@/components/restaurant/PaymentDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import RestaurantService from "@/lib/restaurant-services";
-import { Order, MenuItem, Table, OrderItem } from "@/lib/mock-data";
+import { Order, MenuItem, Table, OrderItem, Payment } from "@/lib/mock-data";
 import {
   Search,
   Plus,
@@ -34,6 +35,9 @@ import {
   Utensils,
   Minus,
   X,
+  CreditCard,
+  Receipt,
+  DollarSign,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +55,9 @@ export default function Orders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [selectedOrderForPayment, setSelectedOrderForPayment] =
+    useState<Order | null>(null);
 
   // New order form state
   const [newOrder, setNewOrder] = useState({
@@ -103,6 +110,28 @@ export default function Orders() {
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
+  };
+
+  const handlePaymentComplete = (payment: Payment) => {
+    // Update the order in the local state
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === payment.orderId
+          ? {
+              ...order,
+              status: "paid" as const,
+              isPaid: true,
+              paymentId: payment.id,
+            }
+          : order,
+      ),
+    );
+    setSelectedOrderForPayment(null);
+  };
+
+  const openPaymentDialog = (order: Order) => {
+    setSelectedOrderForPayment(order);
+    setIsPaymentDialogOpen(true);
   };
 
   const addItemToOrder = () => {
@@ -235,6 +264,8 @@ export default function Orders() {
         return <Utensils className="h-4 w-4 text-blue-500" />;
       case "completed":
         return <CheckCircle className="h-4 w-4 text-gray-500" />;
+      case "paid":
+        return <DollarSign className="h-4 w-4 text-green-600" />;
       default:
         return null;
     }
@@ -252,6 +283,8 @@ export default function Orders() {
         return "outline";
       case "completed":
         return "secondary";
+      case "paid":
+        return "default";
       default:
         return "default";
     }
@@ -264,6 +297,7 @@ export default function Orders() {
     ready: orders.filter((o) => o.status === "ready").length,
     served: orders.filter((o) => o.status === "served").length,
     completed: orders.filter((o) => o.status === "completed").length,
+    paid: orders.filter((o) => o.status === "paid").length,
   };
 
   if (loading) {
@@ -304,6 +338,7 @@ export default function Orders() {
                 <SelectItem value="ready">Ready</SelectItem>
                 <SelectItem value="served">Served</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -563,7 +598,7 @@ export default function Orders() {
 
         {/* Status Tabs */}
         <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
             <TabsTrigger value="pending">
               Pending ({statusCounts.pending})
@@ -580,6 +615,7 @@ export default function Orders() {
             <TabsTrigger value="completed">
               Completed ({statusCounts.completed})
             </TabsTrigger>
+            <TabsTrigger value="paid">Paid ({statusCounts.paid})</TabsTrigger>
           </TabsList>
 
           <TabsContent value={selectedStatus} className="mt-6">
@@ -623,6 +659,15 @@ export default function Orders() {
                           <span className="text-lg font-semibold">
                             ${order.total.toFixed(2)}
                           </span>
+                          {order.isPaid && (
+                            <Badge
+                              variant="outline"
+                              className="text-green-600 border-green-600"
+                            >
+                              <Receipt className="h-3 w-3 mr-1" />
+                              Paid
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </CardHeader>
@@ -653,14 +698,14 @@ export default function Orders() {
                           ))}
                         </div>
 
-                        {/* Order Time */}
+                        {/* Order Time and Actions */}
                         <div className="flex justify-between items-center pt-2 border-t">
                           <span className="text-xs text-muted-foreground">
                             Ordered{" "}
                             {new Date(order.createdAt).toLocaleTimeString()}
                           </span>
 
-                          {/* Status Actions */}
+                          {/* Status and Payment Actions */}
                           <div className="flex space-x-2">
                             {order.status === "pending" && (
                               <Button
@@ -692,15 +737,35 @@ export default function Orders() {
                                 Mark Served
                               </Button>
                             )}
-                            {order.status === "served" && (
+                            {order.status === "served" && !order.isPaid && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    handleStatusChange(order.id, "completed")
+                                  }
+                                >
+                                  Complete
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={() => openPaymentDialog(order)}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <CreditCard className="h-4 w-4 mr-1" />
+                                  Process Payment
+                                </Button>
+                              </>
+                            )}
+                            {order.status === "completed" && !order.isPaid && (
                               <Button
                                 size="sm"
-                                variant="outline"
-                                onClick={() =>
-                                  handleStatusChange(order.id, "completed")
-                                }
+                                onClick={() => openPaymentDialog(order)}
+                                className="bg-green-600 hover:bg-green-700"
                               >
-                                Complete
+                                <CreditCard className="h-4 w-4 mr-1" />
+                                Process Payment
                               </Button>
                             )}
                           </div>
@@ -713,6 +778,17 @@ export default function Orders() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Payment Dialog */}
+        <PaymentDialog
+          order={selectedOrderForPayment}
+          isOpen={isPaymentDialogOpen}
+          onClose={() => {
+            setIsPaymentDialogOpen(false);
+            setSelectedOrderForPayment(null);
+          }}
+          onPaymentComplete={handlePaymentComplete}
+        />
       </div>
     </RestaurantLayout>
   );

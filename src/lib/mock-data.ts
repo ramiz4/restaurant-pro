@@ -20,10 +20,12 @@ export interface Order {
   id: string;
   tableNumber: number;
   items: OrderItem[];
-  status: "pending" | "preparing" | "ready" | "served" | "completed";
+  status: "pending" | "preparing" | "ready" | "served" | "completed" | "paid";
   total: number;
   createdAt: Date;
   serverName: string;
+  paymentId?: string;
+  isPaid?: boolean;
 }
 
 export interface Table {
@@ -55,6 +57,21 @@ export interface User {
   role: "admin" | "manager" | "server" | "kitchen";
   active: boolean;
   createdAt: Date;
+}
+
+export interface Payment {
+  id: string;
+  orderId: string;
+  amount: number;
+  paymentMethod: "cash" | "card" | "mobile";
+  status: "pending" | "completed" | "failed" | "refunded";
+  transactionId?: string;
+  processedAt: Date;
+  processedBy: string;
+  tip?: number;
+  change?: number;
+  cardLast4?: string;
+  receiptNumber: string;
 }
 
 export interface SalesReport {
@@ -294,6 +311,22 @@ export const mockUsers: User[] = [
     role: "admin",
     active: true,
     createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
+  },
+];
+
+export const mockPayments: Payment[] = [
+  {
+    id: "PAY-001",
+    orderId: "ORD-003",
+    amount: 26.97,
+    paymentMethod: "card",
+    status: "completed",
+    transactionId: "TXN-ABC123",
+    processedAt: new Date(Date.now() - 30 * 60 * 1000),
+    processedBy: "Carol Davis",
+    tip: 5.0,
+    cardLast4: "4567",
+    receiptNumber: "RCP-001",
   },
 ];
 

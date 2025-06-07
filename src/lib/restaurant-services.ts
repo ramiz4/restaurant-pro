@@ -5,6 +5,7 @@ import {
   mockInventory,
   mockUsers,
   mockSalesData,
+  mockPayments,
   type MenuItem,
   type Order,
   type Table,
@@ -12,7 +13,8 @@ import {
   type User,
   type SalesReport,
   type OrderItem,
-} from "./mock-data";
+  type Payment
+} from './mock-data';
 
 // Simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -179,16 +181,16 @@ export class RestaurantService {
 
   static async getDashboardStats() {
     await delay(300);
-    const activeOrders = mockOrders.filter((order) =>
-      ["pending", "preparing", "ready"].includes(order.status),
+    const activeOrders = mockOrders.filter(order =>
+      ['pending', 'preparing', 'ready'].includes(order.status)
     ).length;
 
-    const occupiedTables = mockTables.filter(
-      (table) => table.status === "occupied",
+    const occupiedTables = mockTables.filter(table =>
+      table.status === 'occupied'
     ).length;
 
-    const lowStockItems = mockInventory.filter(
-      (item) => item.currentStock <= item.minStock,
+    const lowStockItems = mockInventory.filter(item =>
+      item.currentStock <= item.minStock
     ).length;
 
     const todaySales = mockSalesData[0]?.totalSales || 0;
@@ -199,9 +201,72 @@ export class RestaurantService {
       totalTables: mockTables.length,
       lowStockItems,
       todaySales,
-      totalRevenue: mockSalesData.reduce((sum, day) => sum + day.totalSales, 0),
+      totalRevenue: mockSalesData.reduce((sum, day) => sum + day.totalSales, 0)
     };
   }
+
+  // Payments
+  static async getPayments(): Promise<Payment[]> {
+    await delay(200);
+    return [...mockPayments];
+  }
+
+  static async processPayment(paymentData: Omit<Payment, 'id' | 'processedAt' | 'receiptNumber'>): Promise<Payment> {
+    await delay(1500); // Simulate payment processing time
+
+    const payment: Payment = {
+      ...paymentData,
+      id: `PAY-${String(mockPayments.length + 1).padStart(3, '0')}`,
+      processedAt: new Date(),
+      receiptNumber: `RCP-${String(mockPayments.length + 1).padStart(3, '0')}`
+    };
+
+    mockPayments.push(payment);
+
+    // Update order status to paid
+    const orderIndex = mockOrders.findIndex(order => order.id === paymentData.orderId);
+    if (orderIndex !== -1) {
+      mockOrders[orderIndex].status = 'paid';
+      mockOrders[orderIndex].isPaid = true;
+      mockOrders[orderIndex].paymentId = payment.id;
+    }
+
+    return payment;
+  }
+
+  static async refundPayment(paymentId: string, refundAmount: number): Promise<Payment> {
+    await delay(800);
+
+    const paymentIndex = mockPayments.findIndex(payment => payment.id === paymentId);
+    if (paymentIndex === -1) {
+      throw new Error('Payment not found');
+    }
+
+    // Create refund payment record
+    const refundPayment: Payment = {
+      id: `REF-${String(mockPayments.length + 1).padStart(3, '0')}`,
+      orderId: mockPayments[paymentIndex].orderId,
+      amount: -refundAmount,
+      paymentMethod: mockPayments[paymentIndex].paymentMethod,
+      status: 'completed',
+      processedAt: new Date(),
+      processedBy: mockPayments[paymentIndex].processedBy,
+      receiptNumber: `RFD-${String(mockPayments.length + 1).padStart(3, '0')}`
+    };
+
+    mockPayments.push(refundPayment);
+
+    // Update original payment status
+    mockPayments[paymentIndex].status = 'refunded';
+
+    return refundPayment;
+  }
+
+  static async getPaymentByOrderId(orderId: string): Promise<Payment | null> {
+    await delay(200);
+    return mockPayments.find(payment => payment.orderId === orderId) || null;
+  }
+}
 }
 
 export default RestaurantService;
