@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/restaurant/ThemeToggle";
+import { useUser, getUserByEmail } from "@/contexts/UserContext";
 import {
   ChefHat,
   Lock,
