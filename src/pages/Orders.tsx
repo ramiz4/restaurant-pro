@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -12,8 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import RestaurantService from "@/lib/restaurant-services";
-import { Order } from "@/lib/mock-data";
+import { Order, MenuItem, Table, OrderItem } from "@/lib/mock-data";
 import {
   Search,
   Plus,
@@ -21,28 +32,61 @@ import {
   CheckCircle,
   AlertTriangle,
   Utensils,
+  Minus,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface NewOrderItem {
+  menuItem: MenuItem;
+  quantity: number;
+  specialInstructions?: string;
+}
+
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [tables, setTables] = useState<Table[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
+
+  // New order form state
+  const [newOrder, setNewOrder] = useState({
+    tableNumber: "",
+    serverName: "",
+    notes: "",
+  });
+  const [orderItems, setOrderItems] = useState<NewOrderItem[]>([]);
+  const [selectedMenuItem, setSelectedMenuItem] = useState<string>("");
+  const [quantity, setQuantity] = useState(1);
+  const [specialInstructions, setSpecialInstructions] = useState("");
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchData = async () => {
       try {
-        const data = await RestaurantService.getOrders();
-        setOrders(data);
+        const [ordersData, menuData, tablesData] = await Promise.all([
+          RestaurantService.getOrders(),
+          RestaurantService.getMenuItems(),
+          RestaurantService.getTables(),
+        ]);
+        setOrders(ordersData);
+        setMenuItems(menuData.filter((item) => item.available));
+        setTables(
+          tablesData.filter(
+            (table) =>
+              table.status === "available" || table.status === "occupied",
+          ),
+        );
       } catch (error) {
-        console.error("Failed to fetch orders:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrders();
+    fetchData();
   }, []);
 
   const handleStatusChange = async (
@@ -59,6 +103,112 @@ export default function Orders() {
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
+  };
+
+  const addItemToOrder = () => {
+    if (!selectedMenuItem) return;
+
+    const menuItem = menuItems.find((item) => item.id === selectedMenuItem);
+    if (!menuItem) return;
+
+    const existingItemIndex = orderItems.findIndex(
+      (item) =>
+        item.menuItem.id === selectedMenuItem &&
+        item.specialInstructions === specialInstructions,
+    );
+
+    if (existingItemIndex >= 0) {
+      // Update existing item quantity
+      setOrderItems((prev) =>
+        prev.map((item, index) =>
+          index === existingItemIndex
+            ? { ...item, quantity: item.quantity + quantity }
+            : item,
+        ),
+      );
+    } else {
+      // Add new item
+      setOrderItems((prev) => [
+        ...prev,
+        {
+          menuItem,
+          quantity,
+          specialInstructions: specialInstructions || undefined,
+        },
+      ]);
+    }
+
+    // Reset form
+    setSelectedMenuItem("");
+    setQuantity(1);
+    setSpecialInstructions("");
+  };
+
+  const removeItemFromOrder = (index: number) => {
+    setOrderItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateItemQuantity = (index: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeItemFromOrder(index);
+      return;
+    }
+    setOrderItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, quantity: newQuantity } : item,
+      ),
+    );
+  };
+
+  const calculateTotal = () => {
+    return orderItems.reduce(
+      (total, item) => total + item.menuItem.price * item.quantity,
+      0,
+    );
+  };
+
+  const handleSubmitOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (orderItems.length === 0) {
+      alert("Please add at least one item to the order");
+      return;
+    }
+
+    try {
+      const orderData = {
+        tableNumber: parseInt(newOrder.tableNumber),
+        serverName: newOrder.serverName || "Unknown Server",
+        items: orderItems.map((item, index) => ({
+          id: `item-${index + 1}`,
+          menuItemId: item.menuItem.id,
+          menuItem: item.menuItem,
+          quantity: item.quantity,
+          specialInstructions: item.specialInstructions,
+        })),
+        status: "pending" as const,
+        total: calculateTotal(),
+      };
+
+      const createdOrder = await RestaurantService.createOrder(orderData);
+      setOrders((prev) => [createdOrder, ...prev]);
+
+      // Reset form
+      setNewOrder({ tableNumber: "", serverName: "", notes: "" });
+      setOrderItems([]);
+      setIsNewOrderDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      alert("Failed to create order. Please try again.");
+    }
+  };
+
+  const resetNewOrderForm = () => {
+    setNewOrder({ tableNumber: "", serverName: "", notes: "" });
+    setOrderItems([]);
+    setSelectedMenuItem("");
+    setQuantity(1);
+    setSpecialInstructions("");
   };
 
   const filteredOrders = orders.filter((order) => {
@@ -157,10 +307,258 @@ export default function Orders() {
               </SelectContent>
             </Select>
           </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New Order
-          </Button>
+
+          <Dialog
+            open={isNewOrderDialogOpen}
+            onOpenChange={(open) => {
+              setIsNewOrderDialogOpen(open);
+              if (!open) resetNewOrderForm();
+            }}
+          >
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                New Order
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create New Order</DialogTitle>
+                <DialogDescription>
+                  Add a new order for a table. Select menu items and specify
+                  quantities.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmitOrder}>
+                <div className="grid gap-6 py-4">
+                  {/* Order Details */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="table">Table Number</Label>
+                      <Select
+                        value={newOrder.tableNumber}
+                        onValueChange={(value) =>
+                          setNewOrder((prev) => ({
+                            ...prev,
+                            tableNumber: value,
+                          }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select table" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tables.map((table) => (
+                            <SelectItem
+                              key={table.id}
+                              value={table.number.toString()}
+                            >
+                              Table {table.number} (Capacity: {table.capacity})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="server">Server Name</Label>
+                      <Input
+                        id="server"
+                        value={newOrder.serverName}
+                        onChange={(e) =>
+                          setNewOrder((prev) => ({
+                            ...prev,
+                            serverName: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter server name"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Add Menu Items */}
+                  <div className="border rounded-lg p-4">
+                    <h4 className="font-medium mb-4">Add Menu Items</h4>
+                    <div className="grid gap-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label>Menu Item</Label>
+                          <Select
+                            value={selectedMenuItem}
+                            onValueChange={setSelectedMenuItem}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select menu item" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {menuItems.map((item) => (
+                                <SelectItem key={item.id} value={item.id}>
+                                  {item.name} - ${item.price.toFixed(2)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Quantity</Label>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setQuantity(Math.max(1, quantity - 1))
+                              }
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <Input
+                              type="number"
+                              min="1"
+                              value={quantity}
+                              onChange={(e) =>
+                                setQuantity(parseInt(e.target.value) || 1)
+                              }
+                              className="w-20 text-center"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setQuantity(quantity + 1)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Special Instructions (Optional)</Label>
+                        <Input
+                          value={specialInstructions}
+                          onChange={(e) =>
+                            setSpecialInstructions(e.target.value)
+                          }
+                          placeholder="e.g., No onions, extra spicy, etc."
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={addItemToOrder}
+                        disabled={!selectedMenuItem}
+                        className="w-full"
+                      >
+                        Add Item to Order
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Order Items List */}
+                  {orderItems.length > 0 && (
+                    <div className="border rounded-lg p-4">
+                      <h4 className="font-medium mb-4">Order Items</h4>
+                      <div className="space-y-3">
+                        {orderItems.map((item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                          >
+                            <div className="flex-1">
+                              <p className="font-medium">
+                                {item.menuItem.name}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                ${item.menuItem.price.toFixed(2)} each
+                              </p>
+                              {item.specialInstructions && (
+                                <p className="text-xs text-gray-500 italic">
+                                  {item.specialInstructions}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  updateItemQuantity(index, item.quantity - 1)
+                                }
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="w-8 text-center">
+                                {item.quantity}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  updateItemQuantity(index, item.quantity + 1)
+                                }
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeItemFromOrder(index)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="text-right ml-4">
+                              <p className="font-medium">
+                                $
+                                {(item.menuItem.price * item.quantity).toFixed(
+                                  2,
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="border-t pt-3 text-right">
+                          <p className="text-lg font-bold">
+                            Total: ${calculateTotal().toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  <div className="grid gap-2">
+                    <Label htmlFor="notes">Order Notes (Optional)</Label>
+                    <Textarea
+                      id="notes"
+                      value={newOrder.notes}
+                      onChange={(e) =>
+                        setNewOrder((prev) => ({
+                          ...prev,
+                          notes: e.target.value,
+                        }))
+                      }
+                      placeholder="Additional notes for the order..."
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsNewOrderDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={orderItems.length === 0}>
+                    Create Order
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Status Tabs */}
