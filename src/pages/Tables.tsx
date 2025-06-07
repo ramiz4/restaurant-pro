@@ -27,7 +27,7 @@ import {
   Users,
   Clock,
   CheckCircle,
-  Cleaning,
+  Sparkles,
   Calendar,
   Plus,
 } from "lucide-react";
