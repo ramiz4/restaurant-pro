@@ -87,7 +87,7 @@ export default function Tables() {
       case "reserved":
         return <Calendar className="h-5 w-5 text-purple-500" />;
       case "cleaning":
-        return <Cleaning className="h-5 w-5 text-yellow-500" />;
+        return <Sparkles className="h-5 w-5 text-yellow-500" />;
       default:
         return null;
     }
@@ -219,7 +219,7 @@ export default function Tables() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center space-x-2">
-                <Cleaning className="h-5 w-5 text-yellow-500" />
+                <Sparkles className="h-5 w-5 text-yellow-500" />
                 <div>
                   <p className="text-2xl font-bold">{statusStats.cleaning}</p>
                   <p className="text-sm text-muted-foreground">Cleaning</p>
