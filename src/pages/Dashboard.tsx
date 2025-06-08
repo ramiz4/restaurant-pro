@@ -323,7 +323,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <PermissionGuard page="orders" action="create">
-                <Button 
+                <Button
                   className="h-20 flex-col space-y-2"
                   onClick={handleNewOrder}
                 >
@@ -331,10 +331,10 @@ export default function Dashboard() {
                   <span>Manage Orders</span>
                 </Button>
               </PermissionGuard>
-              
+
               <PermissionGuard page="tables">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="h-20 flex-col space-y-2"
                   onClick={handleManageTables}
                 >
@@ -342,10 +342,10 @@ export default function Dashboard() {
                   <span>Manage Tables</span>
                 </Button>
               </PermissionGuard>
-              
+
               <PermissionGuard page="inventory" action="edit">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="h-20 flex-col space-y-2"
                   onClick={handleUpdateInventory}
                 >
@@ -353,10 +353,10 @@ export default function Dashboard() {
                   <span>Update Inventory</span>
                 </Button>
               </PermissionGuard>
-              
+
               <PermissionGuard page="reports">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="h-20 flex-col space-y-2"
                   onClick={handleViewReports}
                 >
@@ -367,7 +367,8 @@ export default function Dashboard() {
             </div>
 
             {/* Contextual Quick Actions */}
-            {(lowStockItems.length > 0 || (stats?.activeOrders && stats.activeOrders > 0)) && (
+            {(lowStockItems.length > 0 ||
+              (stats?.activeOrders && stats.activeOrders > 0)) && (
               <div className="mt-4 pt-4 border-t">
                 <h4 className="text-sm font-medium text-muted-foreground mb-3">
                   Urgent Actions
@@ -375,8 +376,8 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 gap-2">
                   {lowStockItems.length > 0 && (
                     <PermissionGuard page="inventory" action="restock">
-                      <Button 
-                        variant="destructive" 
+                      <Button
+                        variant="destructive"
                         size="sm"
                         onClick={handleRestockLowItems}
                         className="flex items-center justify-between"
@@ -389,11 +390,11 @@ export default function Dashboard() {
                       </Button>
                     </PermissionGuard>
                   )}
-                  
+
                   {stats?.activeOrders && stats.activeOrders > 0 && (
                     <PermissionGuard page="orders" action="view">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={handleViewPendingOrders}
                         className="flex items-center justify-between border-orange-200 text-orange-700 hover:bg-orange-50"
