@@ -84,7 +84,12 @@ export default function Orders() {
           RestaurantService.getMenuItems(),
           RestaurantService.getTables(),
         ]);
-        setOrders(ordersData);
+        // Sort orders by creation time (newest first)
+        const sortedOrders = [...ordersData].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        setOrders(sortedOrders);
         setMenuItems(menuData.filter((item) => item.available));
         setTables(
           tablesData.filter(

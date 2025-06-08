@@ -72,7 +72,12 @@ export default function Dashboard() {
     );
   }
 
-  const recentOrders = mockOrders.slice(0, 5);
+  const recentOrders = [...mockOrders]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5);
   const lowStockItems = mockInventory.filter(
     (item) => item.currentStock <= item.minStock,
   );
