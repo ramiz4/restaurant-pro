@@ -66,7 +66,11 @@ export default function Menu() {
       console.error("Failed to refresh menu items:", error);
     }
   };
-  const { isRefreshing, progress, pullDistance } = usePullToRefresh({
+  const {
+    isRefreshing,
+    progress,
+    pullDistance: _pullDistance,
+  } = usePullToRefresh({
     onRefresh: refreshMenuItems,
     disabled: !isMobile,
   });
@@ -210,7 +214,7 @@ export default function Menu() {
         )}
         {...(isMobile
           ? {
-              onTouchStart: (e: React.TouchEvent) => {
+              onTouchStart: (_e: React.TouchEvent) => {
                 // Handle touch start for pull-to-refresh manually if needed
               },
             }

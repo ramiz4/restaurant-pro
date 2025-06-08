@@ -98,7 +98,11 @@ export default function Orders() {
     }
   };
 
-  const { isRefreshing, progress, pullDistance } = usePullToRefresh({
+  const {
+    isRefreshing,
+    progress,
+    pullDistance: _pullDistance,
+  } = usePullToRefresh({
     onRefresh: refreshOrders,
     disabled: !isMobile,
   });
