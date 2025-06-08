@@ -111,15 +111,15 @@ export default function Tables() {
   const getStatusColor = (status: Table["status"]) => {
     switch (status) {
       case "available":
-        return "border-green-200 bg-green-50";
+        return "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950";
       case "occupied":
-        return "border-blue-200 bg-blue-50";
+        return "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950";
       case "reserved":
-        return "border-purple-200 bg-purple-50";
+        return "border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-950";
       case "cleaning":
-        return "border-yellow-200 bg-yellow-50";
+        return "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950";
       default:
-        return "border-gray-200";
+        return "border-gray-200 dark:border-gray-800";
     }
   };
 
@@ -162,12 +162,18 @@ export default function Tables() {
         <div className="animate-pulse space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-20 bg-gray-200 rounded-lg"></div>
+              <div
+                key={i}
+                className="h-20 bg-gray-200 dark:bg-gray-800 rounded-lg"
+              ></div>
             ))}
           </div>
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+              <div
+                key={i}
+                className="h-32 bg-gray-200 dark:bg-gray-800 rounded-lg"
+              ></div>
             ))}
           </div>
         </div>
@@ -262,7 +268,7 @@ export default function Tables() {
                   {table.currentOrder && (
                     <div className="text-sm">
                       <span className="font-medium">Current Order: </span>
-                      <span className="text-blue-600">
+                      <span className="text-blue-600 dark:text-blue-400">
                         {table.currentOrder}
                       </span>
                     </div>
@@ -271,7 +277,7 @@ export default function Tables() {
                   {table.reservedFor && (
                     <div className="text-sm">
                       <span className="font-medium">Reserved for: </span>
-                      <span className="text-purple-600">
+                      <span className="text-purple-600 dark:text-purple-400">
                         {table.reservedFor}
                       </span>
                       {table.reservedAt && (
