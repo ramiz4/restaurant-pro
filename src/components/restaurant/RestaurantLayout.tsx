@@ -51,19 +51,19 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
     navigate("/login");
   };
 
-  // Format date and time
+  // Format date and time for European format
   const formatDateTime = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
       weekday: "short",
-      month: "short",
-      day: "numeric",
+      day: "2-digit",
+      month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-      hour12: true,
+      hour12: false, // 24-hour format
     };
-    return date.toLocaleDateString("en-US", options);
+    return date.toLocaleDateString("en-GB", options);
   };
 
   return (
