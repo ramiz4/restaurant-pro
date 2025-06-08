@@ -14,6 +14,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -91,6 +92,32 @@ export default function Dashboard() {
   };
 
   const handleViewAllOrders = () => {
+    navigate("/orders");
+  };
+
+  const handleNewOrder = () => {
+    navigate("/orders");
+  };
+
+  const handleManageTables = () => {
+    navigate("/tables");
+  };
+
+  const handleUpdateInventory = () => {
+    navigate("/inventory");
+  };
+
+  const handleViewReports = () => {
+    navigate("/reports");
+  };
+
+  const handleRestockLowItems = () => {
+    // Navigate to inventory page with focus on low stock items
+    navigate("/inventory");
+  };
+
+  const handleViewPendingOrders = () => {
+    // Navigate to orders page with pending filter
     navigate("/orders");
   };
 
@@ -295,23 +322,93 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <Button className="h-20 flex-col space-y-2">
-                <ShoppingCart className="h-6 w-6" />
-                <span>New Order</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <Users className="h-6 w-6" />
-                <span>Manage Tables</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <Package className="h-6 w-6" />
-                <span>Update Inventory</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex-col space-y-2">
-                <TrendingUp className="h-6 w-6" />
-                <span>View Reports</span>
-              </Button>
+              <PermissionGuard page="orders" action="create">
+                <Button 
+                  className="h-20 flex-col space-y-2"
+                  onClick={handleNewOrder}
+                >
+                  <ShoppingCart className="h-6 w-6" />
+                  <span>Manage Orders</span>
+                </Button>
+              </PermissionGuard>
+              
+              <PermissionGuard page="tables">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col space-y-2"
+                  onClick={handleManageTables}
+                >
+                  <Users className="h-6 w-6" />
+                  <span>Manage Tables</span>
+                </Button>
+              </PermissionGuard>
+              
+              <PermissionGuard page="inventory" action="edit">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col space-y-2"
+                  onClick={handleUpdateInventory}
+                >
+                  <Package className="h-6 w-6" />
+                  <span>Update Inventory</span>
+                </Button>
+              </PermissionGuard>
+              
+              <PermissionGuard page="reports">
+                <Button 
+                  variant="outline" 
+                  className="h-20 flex-col space-y-2"
+                  onClick={handleViewReports}
+                >
+                  <TrendingUp className="h-6 w-6" />
+                  <span>View Reports</span>
+                </Button>
+              </PermissionGuard>
             </div>
+
+            {/* Contextual Quick Actions */}
+            {(lowStockItems.length > 0 || (stats?.activeOrders && stats.activeOrders > 0)) && (
+              <div className="mt-4 pt-4 border-t">
+                <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                  Urgent Actions
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {lowStockItems.length > 0 && (
+                    <PermissionGuard page="inventory" action="restock">
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={handleRestockLowItems}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span>Restock {lowStockItems.length} Low Items</span>
+                        </div>
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </PermissionGuard>
+                  )}
+                  
+                  {stats?.activeOrders && stats.activeOrders > 0 && (
+                    <PermissionGuard page="orders" action="view">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleViewPendingOrders}
+                        className="flex items-center justify-between border-orange-200 text-orange-700 hover:bg-orange-50"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4" />
+                          <span>Check {stats.activeOrders} Active Orders</span>
+                        </div>
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </PermissionGuard>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
