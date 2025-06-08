@@ -78,8 +78,8 @@ export default function Dashboard() {
   );
 
   const handleOrderClick = (orderId: string) => {
-    // Navigate to orders page - could be enhanced to scroll to specific order
-    navigate("/orders");
+    // Navigate to orders page with search parameter to filter by order ID
+    navigate(`/orders?search=${encodeURIComponent(orderId)}`);
   };
 
   const handleViewAllOrders = () => {

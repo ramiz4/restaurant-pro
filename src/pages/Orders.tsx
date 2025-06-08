@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { PaymentDialog } from "@/components/restaurant/PaymentDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,11 +49,14 @@ interface NewOrderItem {
 }
 
 export default function Orders() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || "",
+  );
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
@@ -266,6 +270,16 @@ export default function Orders() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, selectedStatus]);
+
+  // Handle URL search parameter changes
+  useEffect(() => {
+    const searchParam = searchParams.get("search");
+    if (searchParam && searchParam !== searchTerm) {
+      setSearchTerm(searchParam);
+      // Clear the URL parameter after setting the search term to keep URL clean
+      setSearchParams({});
+    }
+  }, [searchParams, searchTerm, setSearchParams]);
 
   const getStatusIcon = (status: Order["status"]) => {
     switch (status) {
