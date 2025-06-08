@@ -1,6 +1,6 @@
 import { Suspense, lazy } from "react";
 
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -43,7 +43,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <HashRouter>
           <Suspense fallback={<PageLoading />}>
             <Routes>
               <Route path="/login" element={<Login />} />
@@ -115,7 +115,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
-        </BrowserRouter>
+        </HashRouter>
       </TooltipProvider>
     </UserProvider>
   </QueryClientProvider>
