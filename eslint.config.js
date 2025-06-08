@@ -42,38 +42,8 @@ export default [
           argsIgnorePattern: "^_",
         },
       ],
-      // Sort imports
-      "import/order": [
-        "error",
-        {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-          ],
-          pathGroups: [
-            {
-              pattern: "react",
-              group: "external",
-              position: "before",
-            },
-            {
-              pattern: "@/**",
-              group: "internal",
-              position: "after",
-            },
-          ],
-          pathGroupsExcludedImportTypes: ["react"],
-          "newlines-between": "always",
-          alphabetize: {
-            order: "asc",
-            caseInsensitive: true,
-          },
-        },
-      ],
+      // Sort imports - disabled strict ordering rules
+      // "import/order": "off",
       // Disable some strict rules for better DX
       "@typescript-eslint/no-unused-vars": "off", // handled by unused-imports
       "@typescript-eslint/no-explicit-any": "warn",
