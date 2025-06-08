@@ -19,18 +19,18 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Keep React and React-DOM together to avoid context issues
-          if (id.includes("react") || id.includes("react-dom")) {
-            return "vendor-react";
-          }
-
           // Charts (largest library)
           if (id.includes("recharts") || id.includes("d3-")) {
             return "vendor-charts";
           }
 
-          // All other node_modules
-          if (id.includes("node_modules")) {
+          // UI libraries
+          if (id.includes("@radix-ui") || id.includes("lucide-react")) {
+            return "vendor-ui";
+          }
+
+          // All other node_modules except React (React stays in main bundle)
+          if (id.includes("node_modules") && !id.includes("react")) {
             return "vendor";
           }
         },
