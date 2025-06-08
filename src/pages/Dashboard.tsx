@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import {
   Card,
@@ -21,6 +22,7 @@ import {
   AlertTriangle,
   Clock,
   CheckCircle,
+  ExternalLink,
 } from "lucide-react";
 
 interface DashboardStats {
@@ -33,6 +35,7 @@ interface DashboardStats {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -73,6 +76,15 @@ export default function Dashboard() {
   const lowStockItems = mockInventory.filter(
     (item) => item.currentStock <= item.minStock,
   );
+
+  const handleOrderClick = (orderId: string) => {
+    // Navigate to orders page - could be enhanced to scroll to specific order
+    navigate("/orders");
+  };
+
+  const handleViewAllOrders = () => {
+    navigate("/orders");
+  };
 
   return (
     <RestaurantLayout>
@@ -151,16 +163,30 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Recent Orders */}
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
-              <CardDescription>Latest orders from the kitchen</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Recent Orders</CardTitle>
+                <CardDescription>
+                  Latest orders from the kitchen
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleViewAllOrders}
+                className="flex items-center space-x-1"
+              >
+                <span>View All</span>
+                <ExternalLink className="h-3 w-3" />
+              </Button>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {recentOrders.map((order) => (
                   <div
                     key={order.id}
-                    className="flex items-center justify-between"
+                    onClick={() => handleOrderClick(order.id)}
+                    className="flex items-center justify-between p-3 rounded-lg border transition-all duration-200 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-md group"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="flex-shrink-0">
@@ -173,11 +199,19 @@ export default function Dashboard() {
                         {order.status === "pending" && (
                           <AlertTriangle className="h-5 w-5 text-red-500" />
                         )}
+                        {order.status === "served" && (
+                          <CheckCircle className="h-5 w-5 text-blue-500" />
+                        )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium">{order.id}</p>
+                        <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                          {order.id}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           Table {order.tableNumber} • {order.serverName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(order.createdAt).toLocaleTimeString()}
                         </p>
                       </div>
                     </div>
@@ -188,7 +222,9 @@ export default function Dashboard() {
                             ? "default"
                             : order.status === "ready"
                               ? "secondary"
-                              : "destructive"
+                              : order.status === "served"
+                                ? "outline"
+                                : "destructive"
                         }
                       >
                         {order.status}
@@ -196,6 +232,7 @@ export default function Dashboard() {
                       <span className="text-sm font-medium">
                         ${order.total.toFixed(2)}
                       </span>
+                      <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
                 ))}
