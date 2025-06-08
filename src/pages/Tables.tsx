@@ -291,9 +291,10 @@ export default function Tables() {
                   {/* Action Buttons */}
                   <div className="pt-2 space-y-2">
                     {table.status === "available" && (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
                         <Button
                           size="sm"
+                          className="w-full text-xs"
                           onClick={() =>
                             handleStatusChange(table.id, "occupied")
                           }
@@ -303,6 +304,7 @@ export default function Tables() {
                         <Button
                           size="sm"
                           variant="outline"
+                          className="w-full text-xs"
                           onClick={() => handleReservation(table)}
                         >
                           Reserve
@@ -311,17 +313,22 @@ export default function Tables() {
                     )}
 
                     {table.status === "occupied" && (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
                         <Button
                           size="sm"
                           variant="outline"
+                          className="w-full text-xs"
                           onClick={() =>
                             handleStatusChange(table.id, "cleaning")
                           }
                         >
                           Clear Table
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full text-xs"
+                        >
                           View Order
                         </Button>
                       </div>
@@ -330,7 +337,7 @@ export default function Tables() {
                     {table.status === "cleaning" && (
                       <Button
                         size="sm"
-                        className="w-full"
+                        className="w-full text-xs"
                         onClick={() =>
                           handleStatusChange(table.id, "available")
                         }
@@ -340,9 +347,10 @@ export default function Tables() {
                     )}
 
                     {table.status === "reserved" && (
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
                         <Button
                           size="sm"
+                          className="w-full text-xs"
                           onClick={() =>
                             handleStatusChange(table.id, "occupied")
                           }
@@ -352,6 +360,7 @@ export default function Tables() {
                         <Button
                           size="sm"
                           variant="outline"
+                          className="w-full text-xs"
                           onClick={() =>
                             handleStatusChange(table.id, "available")
                           }
