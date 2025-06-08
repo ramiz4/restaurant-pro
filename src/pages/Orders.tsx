@@ -271,9 +271,13 @@ export default function Orders() {
   const sortedOrders = [...filteredOrders].sort((a, b) => {
     switch (sortBy) {
       case "newest":
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       case "oldest":
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
       case "highest-amount":
         return b.total - a.total;
       case "lowest-amount":
@@ -287,13 +291,31 @@ export default function Orders() {
       case "server-desc":
         return b.serverName.localeCompare(a.serverName);
       case "status-asc":
-        const statusOrder = ["pending", "preparing", "ready", "served", "completed", "paid"];
+        const statusOrder = [
+          "pending",
+          "preparing",
+          "ready",
+          "served",
+          "completed",
+          "paid",
+        ];
         return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
       case "status-desc":
-        const statusOrderDesc = ["paid", "completed", "served", "ready", "preparing", "pending"];
-        return statusOrderDesc.indexOf(a.status) - statusOrderDesc.indexOf(b.status);
+        const statusOrderDesc = [
+          "paid",
+          "completed",
+          "served",
+          "ready",
+          "preparing",
+          "pending",
+        ];
+        return (
+          statusOrderDesc.indexOf(a.status) - statusOrderDesc.indexOf(b.status)
+        );
       default:
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
     }
   });
 
@@ -759,10 +781,9 @@ export default function Orders() {
             {sortedOrders.length > 0 && (
               <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-muted-foreground">
-                  Showing {startIndex + 1} to {Math.min(startIndex + ordersPerPage, sortedOrders.length)} of {sortedOrders.length} orders
-                </p>
-                  {Math.min(startIndex + ordersPerPage, filteredOrders.length)}{" "}
-                  of {filteredOrders.length} orders
+                  Showing {startIndex + 1} to{" "}
+                  {Math.min(startIndex + ordersPerPage, sortedOrders.length)} of{" "}
+                  {sortedOrders.length} orders
                 </p>
                 <div className="flex items-center space-x-2">
                   <Button
