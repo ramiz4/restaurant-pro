@@ -39,6 +39,9 @@ import {
   CreditCard,
   Receipt,
   DollarSign,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +61,7 @@ export default function Orders() {
     searchParams.get("search") || "",
   );
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
   const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedOrderForPayment, setSelectedOrderForPayment] =
@@ -263,18 +267,48 @@ export default function Orders() {
     return matchesSearch && matchesStatus;
   });
 
+  // Sort orders based on selected sort option
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case "oldest":
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      case "highest-amount":
+        return b.total - a.total;
+      case "lowest-amount":
+        return a.total - b.total;
+      case "table-asc":
+        return a.tableNumber - b.tableNumber;
+      case "table-desc":
+        return b.tableNumber - a.tableNumber;
+      case "server-asc":
+        return a.serverName.localeCompare(b.serverName);
+      case "server-desc":
+        return b.serverName.localeCompare(a.serverName);
+      case "status-asc":
+        const statusOrder = ["pending", "preparing", "ready", "served", "completed", "paid"];
+        return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+      case "status-desc":
+        const statusOrderDesc = ["paid", "completed", "served", "ready", "preparing", "pending"];
+        return statusOrderDesc.indexOf(a.status) - statusOrderDesc.indexOf(b.status);
+      default:
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
+  });
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const totalPages = Math.ceil(sortedOrders.length / ordersPerPage);
   const startIndex = (currentPage - 1) * ordersPerPage;
-  const paginatedOrders = filteredOrders.slice(
+  const paginatedOrders = sortedOrders.slice(
     startIndex,
     startIndex + ordersPerPage,
   );
 
-  // Reset to first page when filters change
+  // Reset to first page when filters or sort changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedStatus]);
+  }, [searchTerm, selectedStatus, sortBy]);
 
   // Handle URL search parameter changes
   useEffect(() => {
@@ -373,6 +407,74 @@ export default function Orders() {
                 <SelectItem value="served">Served</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px]">
+                <ArrowUpDown className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Newest First
+                  </div>
+                </SelectItem>
+                <SelectItem value="oldest">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Oldest First
+                  </div>
+                </SelectItem>
+                <SelectItem value="highest-amount">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Highest Amount
+                  </div>
+                </SelectItem>
+                <SelectItem value="lowest-amount">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Lowest Amount
+                  </div>
+                </SelectItem>
+                <SelectItem value="table-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Table Number (Low-High)
+                  </div>
+                </SelectItem>
+                <SelectItem value="table-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Table Number (High-Low)
+                  </div>
+                </SelectItem>
+                <SelectItem value="server-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Server Name (A-Z)
+                  </div>
+                </SelectItem>
+                <SelectItem value="server-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Server Name (Z-A)
+                  </div>
+                </SelectItem>
+                <SelectItem value="status-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Status (Pending First)
+                  </div>
+                </SelectItem>
+                <SelectItem value="status-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Status (Paid First)
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -654,10 +756,11 @@ export default function Orders() {
 
           <TabsContent value={selectedStatus} className="mt-6">
             {/* Pagination Info */}
-            {filteredOrders.length > 0 && (
+            {sortedOrders.length > 0 && (
               <div className="flex justify-between items-center mb-4">
                 <p className="text-sm text-muted-foreground">
-                  Showing {startIndex + 1} to{" "}
+                  Showing {startIndex + 1} to {Math.min(startIndex + ordersPerPage, sortedOrders.length)} of {sortedOrders.length} orders
+                </p>
                   {Math.min(startIndex + ordersPerPage, filteredOrders.length)}{" "}
                   of {filteredOrders.length} orders
                 </p>
@@ -690,7 +793,7 @@ export default function Orders() {
             )}
 
             <div className="grid gap-4">
-              {filteredOrders.length === 0 ? (
+              {sortedOrders.length === 0 ? (
                 <Card>
                   <CardContent className="flex items-center justify-center py-12">
                     <div className="text-center">
@@ -848,7 +951,7 @@ export default function Orders() {
             </div>
 
             {/* Bottom Pagination */}
-            {filteredOrders.length > ordersPerPage && (
+            {sortedOrders.length > ordersPerPage && (
               <div className="flex justify-center items-center mt-6 space-x-2">
                 <Button
                   variant="outline"
