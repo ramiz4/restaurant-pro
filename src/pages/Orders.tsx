@@ -324,7 +324,7 @@ export default function Orders() {
         return a.serverName.localeCompare(b.serverName);
       case "server-desc":
         return b.serverName.localeCompare(a.serverName);
-      case "status-asc":
+      case "status-asc": {
         const statusOrder = [
           "pending",
           "preparing",
@@ -334,7 +334,8 @@ export default function Orders() {
           "paid",
         ];
         return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
-      case "status-desc":
+      }
+      case "status-desc": {
         const statusOrderDesc = [
           "paid",
           "completed",
@@ -346,6 +347,7 @@ export default function Orders() {
         return (
           statusOrderDesc.indexOf(a.status) - statusOrderDesc.indexOf(b.status)
         );
+      }
       default:
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
