@@ -8,7 +8,10 @@
     "dev": "vite",
     "build": "vite build",
     "test": "vitest --run",
-    "format.fix": "prettier --write .",
+    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "format": "prettier --check .",
+    "format.fix": "npm run lint:fix && prettier --write .",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -68,12 +71,20 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "@tailwindcss/typography": "^0.5.15",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.33.1",
+    "@typescript-eslint/parser": "^8.33.1",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.28.0",
+    "eslint-import-resolver-typescript": "^4.4.3",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
     "globals": "^15.9.0",
     "postcss": "^8.4.47",
     "prettier": "^3.5.3",

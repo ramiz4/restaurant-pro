@@ -1,12 +1,15 @@
-import { Toaster } from "@/components/ui/toaster";
+import { Suspense, lazy } from "react";
+
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { ProtectedRoute } from "@/components/restaurant/ProtectedRoute";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProvider } from "@/contexts/UserContext";
-import { ProtectedRoute } from "@/components/restaurant/ProtectedRoute";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Suspense, lazy } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 
 // Lazy load page components
 const Dashboard = lazy(() => import("./pages/Dashboard"));

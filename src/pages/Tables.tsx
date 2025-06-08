@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+
+import { Calendar, CheckCircle, Sparkles, Users } from "lucide-react";
+
 import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -11,27 +14,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import RestaurantService from "@/lib/restaurant-services";
 import { Table } from "@/lib/mock-data";
-import {
-  Users,
-  Clock,
-  CheckCircle,
-  Sparkles,
-  Calendar,
-  Plus,
-} from "lucide-react";
+import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
 
 export default function Tables() {

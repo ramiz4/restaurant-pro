@@ -1,3 +1,15 @@
+import { useEffect, useState } from "react";
+
+import {
+  ChefHat,
+  Edit,
+  Plus,
+  Search,
+  Shield,
+  UserCheck,
+  Users as UsersIcon,
+} from "lucide-react";
+
 import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -26,16 +38,6 @@ import { Switch } from "@/components/ui/switch";
 import { User } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
-import {
-  ChefHat,
-  Edit,
-  Plus,
-  Search,
-  Shield,
-  UserCheck,
-  Users as UsersIcon,
-} from "lucide-react";
-import { useEffect, useState } from "react";
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);

@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+
 import { usePermissions } from "@/hooks/use-permissions";
 
 interface PermissionGuardProps {

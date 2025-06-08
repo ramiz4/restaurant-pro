@@ -1,3 +1,7 @@
+import { useEffect, useState } from "react";
+
+import { DollarSign, Edit, Plus, Search, Trash2 } from "lucide-react";
+
 import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Badge } from "@/components/ui/badge";
@@ -32,8 +36,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { MenuItem } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
-import { DollarSign, Edit, Plus, Search, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 
 export default function Menu() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);

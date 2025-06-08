@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react";
-import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
-import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
+
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  AlertTriangle,
+  Package,
+  Plus,
+  Search,
+  TrendingUp,
+  Truck,
+} from "lucide-react";
+
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
+import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -28,17 +23,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import RestaurantService from "@/lib/restaurant-services";
-import { InventoryItem } from "@/lib/mock-data";
 import {
-  Search,
-  Plus,
-  Package,
-  AlertTriangle,
-  TrendingUp,
-  Truck,
-} from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { InventoryItem } from "@/lib/mock-data";
+import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
 
 export default function Inventory() {

@@ -1,6 +1,22 @@
 import { useEffect, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
+
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  ExternalLink,
+  Package,
+  ShoppingCart,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,22 +24,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { mockInventory, mockOrders } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
-import { mockOrders, mockTables, mockInventory } from "@/lib/mock-data";
-import {
-  DollarSign,
-  ShoppingCart,
-  Users,
-  Package,
-  TrendingUp,
-  AlertTriangle,
-  Clock,
-  CheckCircle,
-  ExternalLink,
-} from "lucide-react";
 
 interface DashboardStats {
   activeOrders: number;

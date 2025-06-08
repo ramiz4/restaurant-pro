@@ -1,9 +1,9 @@
 import { useUser } from "@/contexts/UserContext";
 import {
-  hasPageAccess,
-  hasActionAccess,
-  getNavigationItems,
   UserRole,
+  getNavigationItems,
+  hasActionAccess,
+  hasPageAccess,
 } from "@/lib/role-permissions";
 
 export function usePermissions() {

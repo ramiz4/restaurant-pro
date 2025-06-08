@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
+
 import { Navigate, useLocation } from "react-router-dom";
+
 import { usePermissions } from "@/hooks/use-permissions";
 
 interface ProtectedRouteProps {

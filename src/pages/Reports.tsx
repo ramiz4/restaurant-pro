@@ -1,6 +1,32 @@
 import { useEffect, useState } from "react";
-import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+
+import {
+  Award,
+  DollarSign,
+  Download,
+  ShoppingCart,
+  Target,
+  TrendingUp,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
 import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
+import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,9 +34,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -18,32 +41,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import RestaurantService from "@/lib/restaurant-services";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SalesReport } from "@/lib/mock-data";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-} from "recharts";
-import {
-  TrendingUp,
-  DollarSign,
-  ShoppingCart,
-  Users,
-  Download,
-  Calendar,
-  Target,
-  Award,
-} from "lucide-react";
+import RestaurantService from "@/lib/restaurant-services";
 
 const COLORS = [
   "#ff6b35",

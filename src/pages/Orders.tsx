@@ -1,23 +1,30 @@
 import { useEffect, useState } from "react";
+
 import { useSearchParams } from "react-router-dom";
-import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+
+import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Minus,
+  Plus,
+  Receipt,
+  Search,
+  Utensils,
+  X,
+} from "lucide-react";
+
 import { PaymentDialog } from "@/components/restaurant/PaymentDialog";
 import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
-import { useUser } from "@/contexts/UserContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,33 +34,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useUser } from "@/contexts/UserContext";
+import { MenuItem, Order, Payment, Table, User } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
-import {
-  Order,
-  MenuItem,
-  Table,
-  OrderItem,
-  Payment,
-  User,
-} from "@/lib/mock-data";
-import {
-  Search,
-  Plus,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  Utensils,
-  Minus,
-  X,
-  CreditCard,
-  Receipt,
-  DollarSign,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface NewOrderItem {
   menuItem: MenuItem;

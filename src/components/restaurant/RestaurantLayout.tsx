@@ -1,22 +1,25 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+
+import {
+  BarChart3,
+  ChefHat,
+  LayoutDashboard,
+  LogOut,
+  MenuIcon,
+  Package,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "@/components/ui/button";
 import { useUser } from "@/contexts/UserContext";
 import { usePermissions } from "@/hooks/use-permissions";
-import {
-  LayoutDashboard,
-  ShoppingCart,
-  MenuIcon,
-  Users,
-  Package,
-  BarChart3,
-  Settings,
-  LogOut,
-  ChefHat,
-} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+import { ThemeToggle } from "./ThemeToggle";
 
 interface RestaurantLayoutProps {
   children: ReactNode;
