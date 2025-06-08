@@ -246,11 +246,11 @@ export default function Tables() {
               )}
             >
               <CardHeader className="pb-3">
-                <div className="space-y-2">
-                  <CardTitle className="text-lg font-semibold">
+                <div className="flex items-start justify-between">
+                  <CardTitle className="text-lg font-semibold leading-tight">
                     Table {table.number}
                   </CardTitle>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
                     {getStatusIcon(table.status)}
                     <Badge
                       variant={getStatusBadgeVariant(table.status)}
