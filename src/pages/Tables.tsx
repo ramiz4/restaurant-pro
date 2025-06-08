@@ -241,7 +241,7 @@ export default function Tables() {
             <Card
               key={table.id}
               className={cn(
-                "overflow-hidden transition-all duration-200 hover:shadow-md min-w-0",
+                "overflow-hidden transition-all duration-200 hover:shadow-md min-w-0 flex flex-col h-full",
                 getStatusColor(table.status),
               )}
             >
