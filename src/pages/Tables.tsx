@@ -261,8 +261,8 @@ export default function Tables() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="flex flex-col h-full">
+                <div className="space-y-3 flex-grow">
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />
                     <span>Capacity: {table.capacity} guests</span>
@@ -290,89 +290,77 @@ export default function Tables() {
                       )}
                     </div>
                   )}
+                </div>
 
-                  {/* Action Buttons */}
-                  <div className="pt-2 space-y-2">
-                    {table.status === "available" && (
-                      <div className="space-y-2">
-                        <Button
-                          size="sm"
-                          className="w-full text-xs"
-                          onClick={() =>
-                            handleStatusChange(table.id, "occupied")
-                          }
-                        >
-                          Seat Guests
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full text-xs"
-                          onClick={() => handleReservation(table)}
-                        >
-                          Reserve
-                        </Button>
-                      </div>
-                    )}
-
-                    {table.status === "occupied" && (
-                      <div className="space-y-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full text-xs"
-                          onClick={() =>
-                            handleStatusChange(table.id, "cleaning")
-                          }
-                        >
-                          Clear Table
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full text-xs"
-                        >
-                          View Order
-                        </Button>
-                      </div>
-                    )}
-
-                    {table.status === "cleaning" && (
+                {/* Action Buttons - Always at Bottom */}
+                <div className="pt-4 mt-auto">
+                  {table.status === "available" && (
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
                         size="sm"
-                        className="w-full text-xs"
+                        className="text-xs"
+                        onClick={() => handleStatusChange(table.id, "occupied")}
+                      >
+                        Seat Guests
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => handleReservation(table)}
+                      >
+                        Reserve
+                      </Button>
+                    </div>
+                  )}
+
+                  {table.status === "occupied" && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => handleStatusChange(table.id, "cleaning")}
+                      >
+                        Clear Table
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-xs">
+                        View Order
+                      </Button>
+                    </div>
+                  )}
+
+                  {table.status === "cleaning" && (
+                    <Button
+                      size="sm"
+                      className="w-full text-xs"
+                      onClick={() => handleStatusChange(table.id, "available")}
+                    >
+                      Mark Clean
+                    </Button>
+                  )}
+
+                  {table.status === "reserved" && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => handleStatusChange(table.id, "occupied")}
+                      >
+                        Check In
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
                         onClick={() =>
                           handleStatusChange(table.id, "available")
                         }
                       >
-                        Mark Clean
+                        Cancel
                       </Button>
-                    )}
-
-                    {table.status === "reserved" && (
-                      <div className="space-y-2">
-                        <Button
-                          size="sm"
-                          className="w-full text-xs"
-                          onClick={() =>
-                            handleStatusChange(table.id, "occupied")
-                          }
-                        >
-                          Check In
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full text-xs"
-                          onClick={() =>
-                            handleStatusChange(table.id, "available")
-                          }
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
