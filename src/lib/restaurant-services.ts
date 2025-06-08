@@ -23,7 +23,11 @@ export class RestaurantService {
   // Orders
   static async getOrders(): Promise<Order[]> {
     await delay(300);
-    return [...mockOrders];
+    // Return orders sorted by creation time (newest first)
+    return [...mockOrders].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
 
   static async createOrder(

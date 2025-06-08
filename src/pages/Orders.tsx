@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { PaymentDialog } from "@/components/restaurant/PaymentDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,8 +25,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import RestaurantService from "@/lib/restaurant-services";
-import { Order, MenuItem, Table, OrderItem, Payment } from "@/lib/mock-data";
+import {
+  Order,
+  MenuItem,
+  Table,
+  OrderItem,
+  Payment,
+  User,
+} from "@/lib/mock-data";
 import {
   Search,
   Plus,
@@ -38,6 +47,9 @@ import {
   CreditCard,
   Receipt,
   DollarSign,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,16 +60,23 @@ interface NewOrderItem {
 }
 
 export default function Orders() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(
+    searchParams.get("search") || "",
+  );
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
   const [isNewOrderDialogOpen, setIsNewOrderDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedOrderForPayment, setSelectedOrderForPayment] =
     useState<Order | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage] = useState(10);
 
   // New order form state
   const [newOrder, setNewOrder] = useState({
@@ -67,18 +86,28 @@ export default function Orders() {
   });
   const [orderItems, setOrderItems] = useState<NewOrderItem[]>([]);
   const [selectedMenuItem, setSelectedMenuItem] = useState<string>("");
+  const [menuItemSearch, setMenuItemSearch] = useState("");
+  const [showMenuDropdown, setShowMenuDropdown] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ordersData, menuData, tablesData] = await Promise.all([
-          RestaurantService.getOrders(),
-          RestaurantService.getMenuItems(),
-          RestaurantService.getTables(),
-        ]);
-        setOrders(ordersData);
+        const [ordersData, menuData, tablesData, usersData] = await Promise.all(
+          [
+            RestaurantService.getOrders(),
+            RestaurantService.getMenuItems(),
+            RestaurantService.getTables(),
+            RestaurantService.getUsers(),
+          ],
+        );
+        // Sort orders by creation time (newest first)
+        const sortedOrders = [...ordersData].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        );
+        setOrders(sortedOrders);
         setMenuItems(menuData.filter((item) => item.available));
         setTables(
           tablesData.filter(
@@ -86,6 +115,12 @@ export default function Orders() {
               table.status === "available" || table.status === "occupied",
           ),
         );
+        // Filter for active servers only
+        const activeServers = usersData.filter(
+          (user) => user.role === "server" && user.active,
+        );
+        console.log("Active servers loaded:", activeServers);
+        setUsers(activeServers);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -169,6 +204,8 @@ export default function Orders() {
 
     // Reset form
     setSelectedMenuItem("");
+    setMenuItemSearch("");
+    setShowMenuDropdown(false);
     setQuantity(1);
     setSpecialInstructions("");
   };
@@ -236,6 +273,8 @@ export default function Orders() {
     setNewOrder({ tableNumber: "", serverName: "", notes: "" });
     setOrderItems([]);
     setSelectedMenuItem("");
+    setMenuItemSearch("");
+    setShowMenuDropdown(false);
     setQuantity(1);
     setSpecialInstructions("");
   };
@@ -251,6 +290,110 @@ export default function Orders() {
 
     return matchesSearch && matchesStatus;
   });
+
+  // Sort orders based on selected sort option
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    switch (sortBy) {
+      case "newest":
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      case "oldest":
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      case "highest-amount":
+        return b.total - a.total;
+      case "lowest-amount":
+        return a.total - b.total;
+      case "table-asc":
+        return a.tableNumber - b.tableNumber;
+      case "table-desc":
+        return b.tableNumber - a.tableNumber;
+      case "server-asc":
+        return a.serverName.localeCompare(b.serverName);
+      case "server-desc":
+        return b.serverName.localeCompare(a.serverName);
+      case "status-asc":
+        const statusOrder = [
+          "pending",
+          "preparing",
+          "ready",
+          "served",
+          "completed",
+          "paid",
+        ];
+        return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+      case "status-desc":
+        const statusOrderDesc = [
+          "paid",
+          "completed",
+          "served",
+          "ready",
+          "preparing",
+          "pending",
+        ];
+        return (
+          statusOrderDesc.indexOf(a.status) - statusOrderDesc.indexOf(b.status)
+        );
+      default:
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+    }
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(sortedOrders.length / ordersPerPage);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+  const paginatedOrders = sortedOrders.slice(
+    startIndex,
+    startIndex + ordersPerPage,
+  );
+
+  // Reset to first page when filters or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedStatus, sortBy]);
+
+  // Filter menu items based on search
+  const filteredMenuItems = menuItems.filter(
+    (item) =>
+      item.name.toLowerCase().includes(menuItemSearch.toLowerCase()) ||
+      item.description.toLowerCase().includes(menuItemSearch.toLowerCase()) ||
+      item.category.toLowerCase().includes(menuItemSearch.toLowerCase()),
+  );
+
+  // Handle menu item selection
+  const handleMenuItemSelect = (item: MenuItem) => {
+    setSelectedMenuItem(item.id);
+    setMenuItemSearch(item.name);
+    setShowMenuDropdown(false);
+  };
+
+  // Handle URL search parameter changes
+  useEffect(() => {
+    const searchParam = searchParams.get("search");
+    if (searchParam && searchParam !== searchTerm) {
+      setSearchTerm(searchParam);
+      // Clear the URL parameter after setting the search term to keep URL clean
+      setSearchParams({});
+    }
+  }, [searchParams, searchTerm, setSearchParams]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showMenuDropdown && !(event.target as Element).closest(".relative")) {
+        setShowMenuDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showMenuDropdown]);
 
   const getStatusIcon = (status: Order["status"]) => {
     switch (status) {
@@ -341,6 +484,74 @@ export default function Orders() {
                 <SelectItem value="paid">Paid</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px]">
+                <ArrowUpDown className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Newest First
+                  </div>
+                </SelectItem>
+                <SelectItem value="oldest">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Oldest First
+                  </div>
+                </SelectItem>
+                <SelectItem value="highest-amount">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Highest Amount
+                  </div>
+                </SelectItem>
+                <SelectItem value="lowest-amount">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Lowest Amount
+                  </div>
+                </SelectItem>
+                <SelectItem value="table-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Table Number (Low-High)
+                  </div>
+                </SelectItem>
+                <SelectItem value="table-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Table Number (High-Low)
+                  </div>
+                </SelectItem>
+                <SelectItem value="server-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Server Name (A-Z)
+                  </div>
+                </SelectItem>
+                <SelectItem value="server-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Server Name (Z-A)
+                  </div>
+                </SelectItem>
+                <SelectItem value="status-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Status (Pending First)
+                  </div>
+                </SelectItem>
+                <SelectItem value="status-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Status (Paid First)
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <Dialog
@@ -396,18 +607,40 @@ export default function Orders() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="server">Server Name</Label>
-                      <Input
-                        id="server"
+                      <Select
                         value={newOrder.serverName}
-                        onChange={(e) =>
+                        onValueChange={(value) =>
                           setNewOrder((prev) => ({
                             ...prev,
-                            serverName: e.target.value,
+                            serverName: value,
                           }))
                         }
-                        placeholder="Enter server name"
-                        required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              loading
+                                ? "Loading servers..."
+                                : users.length === 0
+                                  ? "No servers available"
+                                  : "Select server"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users.length === 0 ? (
+                            <SelectItem value="" disabled>
+                              No active servers found
+                            </SelectItem>
+                          ) : (
+                            users.map((user) => (
+                              <SelectItem key={user.id} value={user.name}>
+                                {user.name}
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -418,52 +651,51 @@ export default function Orders() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                           <Label>Menu Item</Label>
-                          <Select
-                            value={selectedMenuItem}
-                            onValueChange={setSelectedMenuItem}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select menu item" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {menuItems.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
-                                  {item.name} - ${item.price.toFixed(2)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid gap-2">
-                          <Label>Quantity</Label>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                setQuantity(Math.max(1, quantity - 1))
-                              }
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
+                          <div className="relative">
                             <Input
-                              type="number"
-                              min="1"
-                              value={quantity}
-                              onChange={(e) =>
-                                setQuantity(parseInt(e.target.value) || 1)
-                              }
-                              className="w-20 text-center"
+                              placeholder="Search menu items..."
+                              value={menuItemSearch}
+                              onChange={(e) => {
+                                setMenuItemSearch(e.target.value);
+                                setShowMenuDropdown(true);
+                                if (!e.target.value) {
+                                  setSelectedMenuItem("");
+                                }
+                              }}
+                              onFocus={() => setShowMenuDropdown(true)}
+                              className="w-full"
                             />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setQuantity(quantity + 1)}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
+                            {showMenuDropdown && menuItemSearch && (
+                              <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto">
+                                {filteredMenuItems.length === 0 ? (
+                                  <div className="p-3 text-sm text-muted-foreground">
+                                    No menu items found.
+                                  </div>
+                                ) : (
+                                  filteredMenuItems.map((item) => (
+                                    <div
+                                      key={item.id}
+                                      onClick={() => handleMenuItemSelect(item)}
+                                      className="p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                          <span className="font-medium text-sm">
+                                            {item.name}
+                                          </span>
+                                          <span className="text-xs text-muted-foreground">
+                                            {item.category} • {item.description}
+                                          </span>
+                                        </div>
+                                        <span className="font-semibold text-green-600 text-sm">
+                                          ${item.price.toFixed(2)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -619,8 +851,44 @@ export default function Orders() {
           </TabsList>
 
           <TabsContent value={selectedStatus} className="mt-6">
+            {/* Pagination Info */}
+            {sortedOrders.length > 0 && (
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to{" "}
+                  {Math.min(startIndex + ordersPerPage, sortedOrders.length)} of{" "}
+                  {sortedOrders.length} orders
+                </p>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="grid gap-4">
-              {filteredOrders.length === 0 ? (
+              {sortedOrders.length === 0 ? (
                 <Card>
                   <CardContent className="flex items-center justify-center py-12">
                     <div className="text-center">
@@ -637,7 +905,7 @@ export default function Orders() {
                   </CardContent>
                 </Card>
               ) : (
-                filteredOrders.map((order) => (
+                paginatedOrders.map((order) => (
                   <Card key={order.id} className="overflow-hidden">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
@@ -776,6 +1044,66 @@ export default function Orders() {
                 ))
               )}
             </div>
+
+            {/* Bottom Pagination */}
+            {sortedOrders.length > ordersPerPage && (
+              <div className="flex justify-center items-center mt-6 space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                >
+                  First
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum =
+                    Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                  if (pageNum > totalPages) return null;
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                >
+                  Last
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 

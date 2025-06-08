@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,35 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useUser();
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSignOut = () => {
     logout();
     navigate("/login");
+  };
+
+  // Format date and time for European Balkan format with English day names
+  const formatDateTime = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    const seconds = date.getSeconds().toString().padStart(2, "0");
+
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dayName = weekdays[date.getDay()];
+
+    return `${dayName}, ${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
   };
 
   return (
@@ -137,8 +162,8 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
             >
               Restaurant Open
             </Badge>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {new Date().toLocaleTimeString()}
+            <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
+              {formatDateTime(currentDateTime)}
             </div>
             <ThemeToggle />
           </div>
