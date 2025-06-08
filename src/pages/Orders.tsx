@@ -25,6 +25,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import RestaurantService from "@/lib/restaurant-services";
 import {
   Order,
@@ -49,6 +62,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +100,7 @@ export default function Orders() {
   });
   const [orderItems, setOrderItems] = useState<NewOrderItem[]>([]);
   const [selectedMenuItem, setSelectedMenuItem] = useState<string>("");
+  const [isMenuItemOpen, setIsMenuItemOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState("");
 
@@ -199,6 +215,7 @@ export default function Orders() {
 
     // Reset form
     setSelectedMenuItem("");
+    setIsMenuItemOpen(false);
     setQuantity(1);
     setSpecialInstructions("");
   };
@@ -266,6 +283,7 @@ export default function Orders() {
     setNewOrder({ tableNumber: "", serverName: "", notes: "" });
     setOrderItems([]);
     setSelectedMenuItem("");
+    setIsMenuItemOpen(false);
     setQuantity(1);
     setSpecialInstructions("");
   };
@@ -599,21 +617,79 @@ export default function Orders() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                           <Label>Menu Item</Label>
-                          <Select
-                            value={selectedMenuItem}
-                            onValueChange={setSelectedMenuItem}
+                          <Popover
+                            open={isMenuItemOpen}
+                            onOpenChange={setIsMenuItemOpen}
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select menu item" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {menuItems.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
-                                  {item.name} - ${item.price.toFixed(2)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isMenuItemOpen}
+                                className="w-full justify-between"
+                              >
+                                {selectedMenuItem
+                                  ? menuItems.find(
+                                      (item) => item.id === selectedMenuItem,
+                                    )?.name +
+                                    " - $" +
+                                    menuItems
+                                      .find(
+                                        (item) => item.id === selectedMenuItem,
+                                      )
+                                      ?.price.toFixed(2)
+                                  : "Search menu items..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[400px] p-0">
+                              <Command>
+                                <CommandInput placeholder="Search menu items..." />
+                                <CommandList>
+                                  <CommandEmpty>
+                                    No menu item found.
+                                  </CommandEmpty>
+                                  <CommandGroup>
+                                    {menuItems.map((item) => (
+                                      <CommandItem
+                                        key={item.id}
+                                        value={`${item.name} ${item.description} ${item.category}`}
+                                        onSelect={() => {
+                                          setSelectedMenuItem(item.id);
+                                          setIsMenuItemOpen(false);
+                                        }}
+                                      >
+                                        <div className="flex items-center justify-between w-full">
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">
+                                              {item.name}
+                                            </span>
+                                            <span className="text-sm text-muted-foreground">
+                                              {item.category} •{" "}
+                                              {item.description}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center space-x-2">
+                                            <span className="font-semibold text-green-600">
+                                              ${item.price.toFixed(2)}
+                                            </span>
+                                            <Check
+                                              className={cn(
+                                                "h-4 w-4",
+                                                selectedMenuItem === item.id
+                                                  ? "opacity-100"
+                                                  : "opacity-0",
+                                              )}
+                                            />
+                                          </div>
+                                        </div>
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                         <div className="grid gap-2">
                           <Label>Quantity</Label>
