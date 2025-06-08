@@ -393,11 +393,11 @@ This project is configured for automatic deployment to GitHub Pages using GitHub
 #### Setup Instructions:
 
 1. **Push to GitHub**: Ensure your code is pushed to a GitHub repository
-2. **Enable GitHub Pages**: 
+2. **Enable GitHub Pages**:
    - Go to your repository settings
    - Navigate to "Pages" section
    - Select "GitHub Actions" as the source
-3. **Configure Repository Name**: 
+3. **Configure Repository Name**:
    - If your repository name is different from `restaurant-pro`, update the `base` path in `vite.config.ts`:
    ```typescript
    base: mode === 'production' ? '/restaurant-pro/' : '/',
@@ -420,8 +420,9 @@ npm run preview
 ```
 
 The deployment workflow includes:
+
 - ✅ Dependency installation
-- ✅ TypeScript type checking  
+- ✅ TypeScript type checking
 - ✅ ESLint code quality checks
 - ✅ Test execution
 - ✅ Production build
