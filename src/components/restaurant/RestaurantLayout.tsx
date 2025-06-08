@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,35 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useUser();
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   const handleSignOut = () => {
     logout();
     navigate("/login");
+  };
+
+  // Format date and time
+  const formatDateTime = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    };
+    return date.toLocaleDateString("en-US", options);
   };
 
   return (
@@ -137,8 +162,8 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
             >
               Restaurant Open
             </Badge>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              {new Date().toLocaleTimeString()}
+            <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
+              {formatDateTime(currentDateTime)}
             </div>
             <ThemeToggle />
           </div>
