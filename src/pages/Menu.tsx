@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,19 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -29,10 +18,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import RestaurantService from "@/lib/restaurant-services";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { MenuItem } from "@/lib/mock-data";
-import { Search, Plus, Edit, Trash2, DollarSign } from "lucide-react";
+import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
+import { DollarSign, Edit, Plus, Search, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Menu() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -222,11 +223,14 @@ export default function Menu() {
               if (!open) resetForm();
             }}
           >
+            {" "}
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Menu Item
-              </Button>
+              <PermissionGuard page="menu" action="create">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Menu Item
+                </Button>
+              </PermissionGuard>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
@@ -355,22 +359,26 @@ export default function Menu() {
                   <div className="space-y-1">
                     <CardTitle className="text-lg">{item.name}</CardTitle>
                     <Badge variant="outline">{item.category}</Badge>
-                  </div>
+                  </div>{" "}
                   <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(item)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <PermissionGuard page="menu" action="edit">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(item)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </PermissionGuard>
+                    <PermissionGuard page="menu" action="delete">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </PermissionGuard>
                   </div>
                 </div>
               </CardHeader>
@@ -393,7 +401,6 @@ export default function Menu() {
                       onCheckedChange={(checked) =>
                         handleAvailabilityToggle(item.id, checked)
                       }
-                      size="sm"
                     />
                     <span className="text-sm text-muted-foreground">
                       {item.available ? "Available" : "Unavailable"}

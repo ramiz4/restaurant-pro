@@ -1,23 +1,9 @@
-import { useEffect, useState } from "react";
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,21 +13,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Switch } from "@/components/ui/switch";
-import RestaurantService from "@/lib/restaurant-services";
-import { User } from "@/lib/mock-data";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  Search,
-  Plus,
-  Users as UsersIcon,
-  Shield,
-  ChefHat,
-  UserCheck,
-  Edit,
-  Trash2,
-} from "lucide-react";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { User } from "@/lib/mock-data";
+import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
+import {
+  ChefHat,
+  Edit,
+  Plus,
+  Search,
+  Shield,
+  UserCheck,
+  Users as UsersIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
@@ -295,11 +289,14 @@ export default function Users() {
               if (!open) resetForm();
             }}
           >
+            {" "}
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add User
-              </Button>
+              <PermissionGuard page="users" action="create">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add User
+                </Button>
+              </PermissionGuard>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
@@ -449,15 +446,16 @@ export default function Users() {
                         onCheckedChange={(checked) =>
                           handleToggleActive(user.id, checked)
                         }
-                        size="sm"
                       />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(user)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <PermissionGuard page="users" action="edit">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(user)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </PermissionGuard>
                     </div>
                   </div>
                 </div>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "./ThemeToggle";
 import { useUser } from "@/contexts/UserContext";
+import { usePermissions } from "@/hooks/use-permissions";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -21,21 +22,26 @@ interface RestaurantLayoutProps {
   children: ReactNode;
 }
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Orders", href: "/orders", icon: ShoppingCart },
-  { name: "Menu", href: "/menu", icon: MenuIcon },
-  { name: "Tables", href: "/tables", icon: ChefHat },
-  { name: "Inventory", href: "/inventory", icon: Package },
-  { name: "Users", href: "/users", icon: Users },
-  { name: "Reports", href: "/reports", icon: BarChart3 },
-];
+// Icon mapping for dynamic icon rendering
+const iconMap = {
+  LayoutDashboard,
+  ShoppingCart,
+  MenuIcon,
+  ChefHat,
+  Package,
+  Users,
+  BarChart3,
+};
 
 export function RestaurantLayout({ children }: RestaurantLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useUser();
+  const { getNavigationItems } = usePermissions();
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  // Get navigation items based on user role
+  const navigation = getNavigationItems();
 
   // Update time every second
   useEffect(() => {
@@ -79,14 +85,15 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
                 RestaurantPro
               </span>
             </div>
-          </div>
-
+          </div>{" "}
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-4 py-4">
             {navigation.map((item) => {
               const isActive =
                 location.pathname === item.href ||
                 (item.href === "/dashboard" && location.pathname === "/");
+
+              const IconComponent = iconMap[item.icon as keyof typeof iconMap];
 
               return (
                 <Link
@@ -99,13 +106,12 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
                   )}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
+                  <IconComponent className="mr-3 h-5 w-5" />
                   {item.name}
                 </Link>
               );
             })}
           </nav>
-
           {/* User info */}
           <div className="border-t border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center space-x-3 mb-3">

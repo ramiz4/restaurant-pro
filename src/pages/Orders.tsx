@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { PaymentDialog } from "@/components/restaurant/PaymentDialog";
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { useUser } from "@/contexts/UserContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -63,11 +64,12 @@ interface NewOrderItem {
 export default function Orders() {
   const { currentUser } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Helper function to get default server name
   const getDefaultServerName = () => {
-    return currentUser && (currentUser.role === "Server" || currentUser.role === "server") 
-      ? currentUser.name 
+    return currentUser &&
+      (currentUser.role === "Server" || currentUser.role === "server")
+      ? currentUser.name
       : "";
   };
 
@@ -277,9 +279,14 @@ export default function Orders() {
       console.error("Failed to create order:", error);
       alert("Failed to create order. Please try again.");
     }
-  };  const resetNewOrderForm = () => {
+  };
+  const resetNewOrderForm = () => {
     // Preselect current user as server if they are a server
-    setNewOrder({ tableNumber: "", serverName: getDefaultServerName(), notes: "" });
+    setNewOrder({
+      tableNumber: "",
+      serverName: getDefaultServerName(),
+      notes: "",
+    });
     setOrderItems([]);
     setSelectedMenuItem("");
     setMenuItemSearch("");
@@ -570,11 +577,14 @@ export default function Orders() {
               if (!open) resetNewOrderForm();
             }}
           >
+            {" "}
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                New Order
-              </Button>
+              <PermissionGuard page="orders" action="create">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Order
+                </Button>
+              </PermissionGuard>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
@@ -980,51 +990,72 @@ export default function Orders() {
                           <span className="text-xs text-muted-foreground">
                             Ordered{" "}
                             {new Date(order.createdAt).toLocaleTimeString()}
-                          </span>
-
+                          </span>{" "}
                           {/* Status and Payment Actions */}
                           <div className="flex space-x-2">
                             {order.status === "pending" && (
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleStatusChange(order.id, "preparing")
-                                }
-                              >
-                                Start Preparing
-                              </Button>
+                              <PermissionGuard page="orders" action="edit">
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleStatusChange(order.id, "preparing")
+                                  }
+                                >
+                                  Start Preparing
+                                </Button>
+                              </PermissionGuard>
                             )}
                             {order.status === "preparing" && (
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleStatusChange(order.id, "ready")
-                                }
-                              >
-                                Mark Ready
-                              </Button>
+                              <PermissionGuard page="orders" action="edit">
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleStatusChange(order.id, "ready")
+                                  }
+                                >
+                                  Mark Ready
+                                </Button>
+                              </PermissionGuard>
                             )}
                             {order.status === "ready" && (
-                              <Button
-                                size="sm"
-                                onClick={() =>
-                                  handleStatusChange(order.id, "served")
-                                }
-                              >
-                                Mark Served
-                              </Button>
+                              <PermissionGuard page="orders" action="edit">
+                                <Button
+                                  size="sm"
+                                  onClick={() =>
+                                    handleStatusChange(order.id, "served")
+                                  }
+                                >
+                                  Mark Served
+                                </Button>
+                              </PermissionGuard>
                             )}
                             {order.status === "served" && !order.isPaid && (
                               <>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() =>
-                                    handleStatusChange(order.id, "completed")
-                                  }
-                                >
-                                  Complete
-                                </Button>
+                                <PermissionGuard page="orders" action="edit">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleStatusChange(order.id, "completed")
+                                    }
+                                  >
+                                    Complete
+                                  </Button>
+                                </PermissionGuard>
+                                <PermissionGuard page="orders" action="payment">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => openPaymentDialog(order)}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    <CreditCard className="h-4 w-4 mr-1" />
+                                    Process Payment
+                                  </Button>
+                                </PermissionGuard>
+                              </>
+                            )}
+                            {order.status === "completed" && !order.isPaid && (
+                              <PermissionGuard page="orders" action="payment">
                                 <Button
                                   size="sm"
                                   onClick={() => openPaymentDialog(order)}
@@ -1033,17 +1064,7 @@ export default function Orders() {
                                   <CreditCard className="h-4 w-4 mr-1" />
                                   Process Payment
                                 </Button>
-                              </>
-                            )}
-                            {order.status === "completed" && !order.isPaid && (
-                              <Button
-                                size="sm"
-                                onClick={() => openPaymentDialog(order)}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <CreditCard className="h-4 w-4 mr-1" />
-                                Process Payment
-                              </Button>
+                              </PermissionGuard>
                             )}
                           </div>
                         </div>

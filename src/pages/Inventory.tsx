@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import {
   Card,
   CardContent,
@@ -289,11 +290,14 @@ export default function Inventory() {
           </div>
 
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            {" "}
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Item
-              </Button>
+              <PermissionGuard page="inventory" action="create">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Item
+                </Button>
+              </PermissionGuard>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
@@ -520,16 +524,17 @@ export default function Inventory() {
                         Last restocked:{" "}
                         {new Date(item.lastRestocked).toLocaleDateString()}
                       </div>
-                    </div>
-
+                    </div>{" "}
                     <div className="ml-6">
-                      <Button
-                        onClick={() => openRestockDialog(item)}
-                        className="flex items-center space-x-2"
-                      >
-                        <Truck className="h-4 w-4" />
-                        <span>Restock</span>
-                      </Button>
+                      <PermissionGuard page="inventory" action="restock">
+                        <Button
+                          onClick={() => openRestockDialog(item)}
+                          className="flex items-center space-x-2"
+                        >
+                          <Truck className="h-4 w-4" />
+                          <span>Restock</span>
+                        </Button>
+                      </PermissionGuard>
                     </div>
                   </div>
                 </CardContent>

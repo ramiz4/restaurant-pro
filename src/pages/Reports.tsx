@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import {
   Card,
   CardContent,
@@ -152,12 +153,14 @@ export default function Reports() {
                 <SelectItem value="month">This Month</SelectItem>
                 <SelectItem value="quarter">This Quarter</SelectItem>
                 <SelectItem value="year">This Year</SelectItem>
-              </SelectContent>
+              </SelectContent>{" "}
             </Select>
-            <Button>
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
+            <PermissionGuard page="reports" action="export">
+              <Button>
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            </PermissionGuard>
           </div>
         </div>
 

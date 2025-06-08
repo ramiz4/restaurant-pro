@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -371,75 +372,93 @@ export default function Tables() {
                       )}
                     </div>
                   )}
-                </div>
-
+                </div>{" "}
                 {/* Action Buttons - Always at Bottom */}
                 <div className="pt-4 mt-auto">
+                  {" "}
                   {table.status === "available" && (
                     <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        size="sm"
-                        className="text-xs"
-                        onClick={() => handleStatusChange(table.id, "occupied")}
-                      >
-                        Seat Guests
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs"
-                        onClick={() => handleReservation(table)}
-                      >
-                        Reserve
-                      </Button>
+                      <PermissionGuard page="tables" action="edit">
+                        <Button
+                          size="sm"
+                          className="text-xs"
+                          onClick={() =>
+                            handleStatusChange(table.id, "occupied")
+                          }
+                        >
+                          Seat Guests
+                        </Button>
+                      </PermissionGuard>
+                      <PermissionGuard page="tables" action="reserve">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() => handleReservation(table)}
+                        >
+                          Reserve
+                        </Button>
+                      </PermissionGuard>
                     </div>
-                  )}
-
+                  )}{" "}
                   {table.status === "occupied" && (
                     <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs"
-                        onClick={() => handleStatusChange(table.id, "cleaning")}
-                      >
-                        Clear Table
-                      </Button>
+                      <PermissionGuard page="tables" action="edit">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() =>
+                            handleStatusChange(table.id, "cleaning")
+                          }
+                        >
+                          Clear Table
+                        </Button>
+                      </PermissionGuard>
                       <Button size="sm" variant="outline" className="text-xs">
                         View Order
                       </Button>
                     </div>
-                  )}
-
+                  )}{" "}
                   {table.status === "cleaning" && (
-                    <Button
-                      size="sm"
-                      className="w-full text-xs"
-                      onClick={() => handleStatusChange(table.id, "available")}
-                    >
-                      Mark Clean
-                    </Button>
-                  )}
-
-                  {table.status === "reserved" && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <PermissionGuard page="tables" action="edit">
                       <Button
                         size="sm"
-                        className="text-xs"
-                        onClick={() => handleStatusChange(table.id, "occupied")}
-                      >
-                        Check In
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs"
+                        className="w-full text-xs"
                         onClick={() =>
                           handleStatusChange(table.id, "available")
                         }
                       >
-                        Cancel
+                        Mark Clean
                       </Button>
+                    </PermissionGuard>
+                  )}
+                  {table.status === "reserved" && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {" "}
+                      <PermissionGuard page="tables" action="edit">
+                        <Button
+                          size="sm"
+                          className="text-xs"
+                          onClick={() =>
+                            handleStatusChange(table.id, "occupied")
+                          }
+                        >
+                          Check In
+                        </Button>
+                      </PermissionGuard>
+                      <PermissionGuard page="tables" action="reserve">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() =>
+                            handleStatusChange(table.id, "available")
+                          }
+                        >
+                          Cancel
+                        </Button>
+                      </PermissionGuard>
                     </div>
                   )}
                 </div>
