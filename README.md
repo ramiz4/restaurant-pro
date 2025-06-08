@@ -4,6 +4,10 @@ A modern, full-featured restaurant management application built with React, Type
 
 **🔐 Now featuring comprehensive Role-Based Access Control (RBAC) with 4 distinct user roles!**
 
+## 🚀 Live Demo
+
+🌐 **[View Live Application](https://ramiz4.github.io/restaurant-pro/)**
+
 ## 🚀 Features
 
 ### 🔐 Role-Based Access Control (NEW!)
@@ -379,6 +383,49 @@ The application is fully responsive and optimized for:
 - **Online Ordering Integration**: Customer-facing ordering with staff notifications
 - **Staff Scheduling Module**: Role-based schedule management
 - **Supplier Management**: Vendor relationships with permission controls
+
+## 🚀 Deployment
+
+### GitHub Pages
+
+This project is configured for automatic deployment to GitHub Pages using GitHub Actions.
+
+#### Setup Instructions:
+
+1. **Push to GitHub**: Ensure your code is pushed to a GitHub repository
+2. **Enable GitHub Pages**: 
+   - Go to your repository settings
+   - Navigate to "Pages" section
+   - Select "GitHub Actions" as the source
+3. **Configure Repository Name**: 
+   - If your repository name is different from `restaurant-pro`, update the `base` path in `vite.config.ts`:
+   ```typescript
+   base: mode === 'production' ? '/restaurant-pro/' : '/',
+   ```
+
+#### Automatic Deployment:
+
+- **Trigger**: Every push to the `main` branch
+- **Process**: Build → Test → Lint → Deploy
+- **URL**: `https://ramiz4.github.io/restaurant-pro/`
+
+#### Manual Deployment:
+
+```bash
+# Build the project
+npm run build
+
+# Preview locally
+npm run preview
+```
+
+The deployment workflow includes:
+- ✅ Dependency installation
+- ✅ TypeScript type checking  
+- ✅ ESLint code quality checks
+- ✅ Test execution
+- ✅ Production build
+- ✅ Automatic deployment to GitHub Pages
 
 ## 🤝 Contributing
 
