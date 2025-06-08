@@ -116,9 +116,11 @@ export default function Orders() {
           ),
         );
         // Filter for active servers only
-        setUsers(
-          usersData.filter((user) => user.role === "server" && user.active),
+        const activeServers = usersData.filter(
+          (user) => user.role === "server" && user.active,
         );
+        console.log("Active servers loaded:", activeServers);
+        setUsers(activeServers);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -615,14 +617,28 @@ export default function Orders() {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select server" />
+                          <SelectValue
+                            placeholder={
+                              loading
+                                ? "Loading servers..."
+                                : users.length === 0
+                                  ? "No servers available"
+                                  : "Select server"
+                            }
+                          />
                         </SelectTrigger>
                         <SelectContent>
-                          {users.map((user) => (
-                            <SelectItem key={user.id} value={user.name}>
-                              {user.name}
+                          {users.length === 0 ? (
+                            <SelectItem value="" disabled>
+                              No active servers found
                             </SelectItem>
-                          ))}
+                          ) : (
+                            users.map((user) => (
+                              <SelectItem key={user.id} value={user.name}>
+                                {user.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>

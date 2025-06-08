@@ -1116,6 +1116,7 @@ export const mockInventory: InventoryItem[] = [
 ];
 
 export const mockUsers: User[] = [
+  // Servers
   {
     id: "1",
     name: "Alice Johnson",
@@ -1132,6 +1133,40 @@ export const mockUsers: User[] = [
     active: true,
     createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
   },
+  {
+    id: "6",
+    name: "Sarah Martinez",
+    email: "sarah@restaurant.com",
+    role: "server",
+    active: true,
+    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: "7",
+    name: "Mike Thompson",
+    email: "mike@restaurant.com",
+    role: "server",
+    active: true,
+    createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: "8",
+    name: "Jessica Lee",
+    email: "jessica@restaurant.com",
+    role: "server",
+    active: true,
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+  },
+  {
+    id: "9",
+    name: "James Wilson",
+    email: "james@restaurant.com",
+    role: "server",
+    active: false, // Inactive server for testing filtering
+    createdAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000),
+  },
+
+  // Management and other roles
   {
     id: "3",
     name: "Carol Davis",
