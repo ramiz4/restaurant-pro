@@ -1,5 +1,7 @@
 {
-  "name": "fusion-starter",
+  "name": "restaurant-pro",
+  "version": "1.0.0",
+  "description": "Complete Restaurant Management System with RBAC",
   "private": true,
   "type": "module",
   "scripts": {
