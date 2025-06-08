@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
 import {
   ArrowRight,
   ChefHat,
@@ -12,8 +14,6 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
 
 import { ThemeToggle } from "@/components/restaurant/ThemeToggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";

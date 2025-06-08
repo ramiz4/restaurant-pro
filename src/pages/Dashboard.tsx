@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
 import {
   AlertTriangle,
   CheckCircle,
@@ -11,8 +13,6 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
 
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Badge } from "@/components/ui/badge";

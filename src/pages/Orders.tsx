@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import { useSearchParams } from "react-router-dom";
+
 import {
   AlertTriangle,
   ArrowDown,
@@ -16,8 +18,6 @@ import {
   Utensils,
   X,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
-
 
 import { PaymentDialog } from "@/components/restaurant/PaymentDialog";
 import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
