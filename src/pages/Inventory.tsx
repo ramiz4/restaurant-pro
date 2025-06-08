@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 
 import {
   AlertTriangle,
+  Edit,
   Package,
   Plus,
   Search,
+  Trash2,
   TrendingUp,
   Truck,
 } from "lucide-react";
@@ -33,6 +35,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SwipeToAction } from "@/components/ui/swipe-to-action";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { InventoryItem } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
@@ -45,6 +50,8 @@ export default function Inventory() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isRestockDialogOpen, setIsRestockDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const isMobile = useIsMobile();
 
   // Form state for new items
   const [formData, setFormData] = useState({
@@ -61,6 +68,21 @@ export default function Inventory() {
   const [restockData, setRestockData] = useState({
     quantity: "",
     cost: "",
+  });
+
+  // Pull-to-refresh functionality
+  const refreshInventory = async () => {
+    try {
+      const data = await RestaurantService.getInventory();
+      setInventory(data);
+    } catch (error) {
+      console.error("Failed to refresh inventory:", error);
+    }
+  };
+
+  const { isRefreshing, progress, pullDistance } = usePullToRefresh({
+    onRefresh: refreshInventory,
+    disabled: !isMobile,
   });
 
   useEffect(() => {
@@ -123,7 +145,6 @@ export default function Inventory() {
     const maxStock = item.minStock * 3; // Assume max stock is 3x minimum
     return (item.currentStock / maxStock) * 100;
   };
-
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -139,22 +160,22 @@ export default function Inventory() {
         lastRestocked: new Date(),
       };
 
-      const newItem = await RestaurantService.addInventoryItem(itemData);
-      setInventory((prev) => [...prev, newItem]);
+      if (editingItem) {
+        // Update existing item (simulate with replace in mock data)
+        const updatedItem = { ...editingItem, ...itemData };
+        setInventory((prev) =>
+          prev.map((item) => (item.id === editingItem.id ? updatedItem : item)),
+        );
+      } else {
+        // Add new item
+        const newItem = await RestaurantService.addInventoryItem(itemData);
+        setInventory((prev) => [...prev, newItem]);
+      }
 
-      // Reset form
-      setFormData({
-        name: "",
-        category: "",
-        currentStock: "",
-        minStock: "",
-        unit: "",
-        costPerUnit: "",
-        supplier: "",
-      });
+      resetForm();
       setIsAddDialogOpen(false);
     } catch (error) {
-      console.error("Failed to add inventory item:", error);
+      console.error("Failed to save inventory item:", error);
     }
   };
 
@@ -182,36 +203,143 @@ export default function Inventory() {
       console.error("Failed to restock item:", error);
     }
   };
-
   const openRestockDialog = (item: InventoryItem) => {
     setSelectedItem(item);
     setIsRestockDialogOpen(true);
+  };
+
+  const handleEdit = (item: InventoryItem) => {
+    setEditingItem(item);
+    setFormData({
+      name: item.name,
+      category: item.category,
+      currentStock: item.currentStock.toString(),
+      minStock: item.minStock.toString(),
+      unit: item.unit,
+      costPerUnit: item.costPerUnit.toString(),
+      supplier: item.supplier,
+    });
+    setIsAddDialogOpen(true);
+  };
+  const handleDelete = async (itemId: string) => {
+    if (!confirm("Are you sure you want to delete this inventory item?")) {
+      return;
+    }
+
+    try {
+      // Simulate delete by removing from local state
+      setInventory((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (error) {
+      console.error("Failed to delete inventory item:", error);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      category: "",
+      currentStock: "",
+      minStock: "",
+      unit: "",
+      costPerUnit: "",
+      supplier: "",
+    });
+    setEditingItem(null);
   };
 
   if (loading) {
     return (
       <RestaurantLayout>
         <div className="animate-pulse space-y-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-3 mb-6">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-20 sm:h-24 bg-gray-200 dark:bg-gray-800 rounded-lg"
+              ></div>
+            ))}
+          </div>
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
+            <div
+              key={i}
+              className="h-32 sm:h-40 bg-gray-200 dark:bg-gray-800 rounded-lg"
+            ></div>
           ))}
         </div>
       </RestaurantLayout>
     );
   }
-
   return (
     <RestaurantLayout>
-      <div className="space-y-6">
+      {/* Pull-to-refresh visual feedback for mobile */}
+      {isMobile && (
+        <div
+          className={cn(
+            "absolute top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b",
+            "transition-all duration-300 ease-out",
+            isRefreshing || pullDistance > 50
+              ? "opacity-100 transform translate-y-0"
+              : "opacity-0 transform -translate-y-full",
+          )}
+          style={{
+            height: `${Math.min(pullDistance, 80)}px`,
+          }}
+        >
+          <div className="flex items-center justify-center h-full px-4">
+            <div className="flex items-center space-x-3">
+              <div
+                className={cn(
+                  "w-5 h-5 border-2 border-primary border-t-transparent rounded-full",
+                  isRefreshing ? "animate-spin" : "",
+                )}
+              />
+              <span className="text-sm font-medium text-muted-foreground">
+                {isRefreshing
+                  ? "Refreshing inventory..."
+                  : pullDistance > 50
+                    ? "Release to refresh"
+                    : "Pull to refresh"}
+              </span>
+              {progress > 0 && (
+                <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-300 ease-out rounded-full"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main content with mobile touch gestures support */}
+      <div
+        className={cn(
+          "space-y-4 sm:space-y-6",
+          isMobile && "touch-none select-none",
+          isMobile &&
+            pullDistance > 0 &&
+            "transform transition-transform duration-200 ease-out",
+        )}
+        style={{
+          transform:
+            isMobile && pullDistance > 0
+              ? `translateY(${Math.min(pullDistance, 80)}px)`
+              : undefined,
+        }}
+      >
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Items</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{inventory.length}</div>
+              <div className="text-xl sm:text-2xl font-bold">
+                {inventory.length}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Tracked inventory items
               </p>
@@ -224,7 +352,7 @@ export default function Inventory() {
               <AlertTriangle className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-xl sm:text-2xl font-bold text-red-600">
                 {lowStockItems.length}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -239,7 +367,7 @@ export default function Inventory() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 $
                 {inventory
                   .reduce(
@@ -254,24 +382,23 @@ export default function Inventory() {
             </CardContent>
           </Card>
         </div>
-
         {/* Header Actions */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search inventory..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-[300px]"
+                className="pl-8 w-full sm:w-[300px]"
               />
             </div>
             <Select
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -283,23 +410,32 @@ export default function Inventory() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          </div>{" "}
+          <Dialog
+            open={isAddDialogOpen}
+            onOpenChange={(open) => {
+              setIsAddDialogOpen(open);
+              if (!open) resetForm();
+            }}
+          >
             {" "}
             <DialogTrigger asChild>
               <PermissionGuard page="inventory" action="create">
-                <Button>
+                <Button className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Item
                 </Button>
               </PermissionGuard>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] mx-4 sm:mx-0">
               <DialogHeader>
-                <DialogTitle>Add Inventory Item</DialogTitle>
+                <DialogTitle>
+                  {editingItem ? "Edit Inventory Item" : "Add Inventory Item"}
+                </DialogTitle>
                 <DialogDescription>
-                  Add a new item to your inventory tracking system.
+                  {editingItem
+                    ? "Update the inventory item details below."
+                    : "Add a new item to your inventory tracking system."}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAddItem}>
@@ -420,72 +556,76 @@ export default function Inventory() {
                       />
                     </div>
                   </div>
-                </div>
-                <DialogFooter>
+                </div>{" "}
+                <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
                   <Button
                     type="button"
                     variant="outline"
+                    className="w-full sm:w-auto"
                     onClick={() => setIsAddDialogOpen(false)}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">Add Item</Button>
+                  <Button type="submit" className="w-full sm:w-auto">
+                    {editingItem ? "Update Item" : "Add Item"}
+                  </Button>
                 </DialogFooter>
               </form>
             </DialogContent>
           </Dialog>
-        </div>
-
+        </div>{" "}
         {/* Inventory Items */}
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {filteredItems.map((item) => {
             const stockLevel = getStockLevel(item);
-            return (
+            const ItemCard = () => (
               <Card key={item.id} className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
                         <div>
-                          <h3 className="text-lg font-semibold">{item.name}</h3>
-                          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <h3 className="text-base sm:text-lg font-semibold">
+                            {item.name}
+                          </h3>
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 text-xs sm:text-sm text-muted-foreground">
                             <Badge variant="outline">{item.category}</Badge>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <span>{item.supplier}</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-3 grid grid-cols-4 gap-4">
+                      <div className="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                         <div>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Current Stock
                           </p>
-                          <p className="text-xl font-bold">
+                          <p className="text-lg sm:text-xl font-bold">
                             {item.currentStock} {item.unit}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Min Stock
                           </p>
-                          <p className="text-lg">
+                          <p className="text-sm sm:text-lg">
                             {item.minStock} {item.unit}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Cost per Unit
                           </p>
-                          <p className="text-lg">
+                          <p className="text-sm sm:text-lg">
                             ${item.costPerUnit.toFixed(2)}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Total Value
                           </p>
-                          <p className="text-lg font-semibold">
+                          <p className="text-sm sm:text-lg font-semibold">
                             ${(item.currentStock * item.costPerUnit).toFixed(2)}
                           </p>
                         </div>
@@ -493,7 +633,7 @@ export default function Inventory() {
 
                       <div className="mt-4">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-xs sm:text-sm text-muted-foreground">
                             Stock Level
                           </span>
                           <Badge variant={getStockBadgeVariant(stockLevel)}>
@@ -520,12 +660,12 @@ export default function Inventory() {
                         Last restocked:{" "}
                         {new Date(item.lastRestocked).toLocaleDateString()}
                       </div>
-                    </div>{" "}
-                    <div className="ml-6">
+                    </div>
+                    <div className="lg:ml-6 mt-4 lg:mt-0">
                       <PermissionGuard page="inventory" action="restock">
                         <Button
                           onClick={() => openRestockDialog(item)}
-                          className="flex items-center space-x-2"
+                          className="flex items-center space-x-2 w-full lg:w-auto"
                         >
                           <Truck className="h-4 w-4" />
                           <span>Restock</span>
@@ -536,15 +676,41 @@ export default function Inventory() {
                 </CardContent>
               </Card>
             );
+            return isMobile ? (
+              <SwipeToAction
+                key={item.id}
+                leftActions={[
+                  {
+                    id: "edit",
+                    icon: <Edit className="h-4 w-4" />,
+                    label: "Edit",
+                    color: "primary",
+                    onAction: () => handleEdit(item),
+                  },
+                ]}
+                rightActions={[
+                  {
+                    id: "delete",
+                    icon: <Trash2 className="h-4 w-4" />,
+                    label: "Delete",
+                    color: "destructive",
+                    onAction: () => handleDelete(item.id),
+                  },
+                ]}
+              >
+                <ItemCard />
+              </SwipeToAction>
+            ) : (
+              <ItemCard key={item.id} />
+            );
           })}
         </div>
-
         {/* Restock Dialog */}
         <Dialog
           open={isRestockDialogOpen}
           onOpenChange={setIsRestockDialogOpen}
         >
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] mx-4 sm:mx-0">
             <DialogHeader>
               <DialogTitle>Restock Item</DialogTitle>
               <DialogDescription>
@@ -600,20 +766,22 @@ export default function Inventory() {
                   </div>
                 )}
               </div>
-              <DialogFooter>
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
                 <Button
                   type="button"
                   variant="outline"
+                  className="w-full sm:w-auto"
                   onClick={() => setIsRestockDialogOpen(false)}
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Restock Item</Button>
+                <Button type="submit" className="w-full sm:w-auto">
+                  Restock Item
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
-        </Dialog>
-
+        </Dialog>{" "}
         {filteredItems.length === 0 && (
           <Card>
             <CardContent className="flex items-center justify-center py-12">

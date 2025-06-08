@@ -31,8 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SwipeToAction } from "@/components/ui/swipe-to-action";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { MenuItem } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
@@ -44,6 +47,7 @@ export default function Menu() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const isMobile = useIsMobile();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -52,6 +56,19 @@ export default function Menu() {
     price: "",
     category: "",
     available: true,
+  });
+  // Pull-to-refresh functionality
+  const refreshMenuItems = async () => {
+    try {
+      const data = await RestaurantService.getMenuItems();
+      setMenuItems(data);
+    } catch (error) {
+      console.error("Failed to refresh menu items:", error);
+    }
+  };
+  const { isRefreshing, progress, pullDistance } = usePullToRefresh({
+    onRefresh: refreshMenuItems,
+    disabled: !isMobile,
   });
 
   useEffect(() => {
@@ -184,27 +201,75 @@ export default function Menu() {
       </RestaurantLayout>
     );
   }
-
   return (
     <RestaurantLayout>
-      <div className="space-y-6">
+      <div
+        className={cn(
+          "space-y-4 lg:space-y-6",
+          isMobile && "touch-none select-none",
+        )}
+        {...(isMobile
+          ? {
+              onTouchStart: (e: React.TouchEvent) => {
+                // Handle touch start for pull-to-refresh manually if needed
+              },
+            }
+          : {})}
+        style={
+          isMobile
+            ? {
+                transform: `translateY(${progress * 60}px)`,
+                transition: isRefreshing ? "transform 0.3s ease-out" : "none",
+              }
+            : undefined
+        }
+      >
+        {/* Pull to refresh indicator */}
+        {isMobile && progress > 0 && (
+          <div className="flex justify-center pb-4">
+            <div
+              className={cn(
+                "flex items-center space-x-2 text-sm text-muted-foreground transition-all duration-200",
+                progress > 0.8 && "text-primary",
+              )}
+            >
+              <div
+                className={cn(
+                  "rounded-full border-2 border-current w-6 h-6 transition-transform duration-200",
+                  isRefreshing && "animate-spin",
+                  progress > 0.8 && "scale-110",
+                )}
+              >
+                <div className="w-1 h-1 bg-current rounded-full m-auto mt-1.5" />
+              </div>
+              <span>
+                {isRefreshing
+                  ? "Refreshing menu..."
+                  : progress > 0.8
+                    ? "Release to refresh"
+                    : "Pull to refresh"}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Header Actions */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search menu items..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-[300px]"
+                className="pl-8 w-full sm:w-[300px]"
               />
             </div>
             <Select
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full sm:w-[160px]">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -225,15 +290,14 @@ export default function Menu() {
               if (!open) resetForm();
             }}
           >
-            {" "}
-            <DialogTrigger asChild>
-              <PermissionGuard page="menu" action="create">
-                <Button>
+            <PermissionGuard page="menu" action="create">
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Menu Item
                 </Button>
-              </PermissionGuard>
-            </DialogTrigger>
+              </DialogTrigger>
+            </PermissionGuard>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>
@@ -350,68 +414,110 @@ export default function Menu() {
         </div>
 
         {/* Menu Items Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredItems.map((item) => (
-            <Card
-              key={item.id}
-              className={cn("overflow-hidden", !item.available && "opacity-60")}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{item.name}</CardTitle>
-                    <Badge variant="outline">{item.category}</Badge>
-                  </div>{" "}
-                  <div className="flex items-center space-x-2">
-                    <PermissionGuard page="menu" action="edit">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(item)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </PermissionGuard>
-                    <PermissionGuard page="menu" action="delete">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </PermissionGuard>
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredItems.map((item) => {
+            const menuItemCard = (
+              <Card
+                key={item.id}
+                className={cn(
+                  "overflow-hidden hover:shadow-md transition-shadow",
+                  !item.available && "opacity-60",
+                )}
+              >
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <CardTitle className="text-base sm:text-lg truncate">
+                        {item.name}
+                      </CardTitle>
+                      <Badge variant="outline" className="text-xs">
+                        {item.category}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
+                      <PermissionGuard page="menu" action="edit">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(item)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </PermissionGuard>
+                      <PermissionGuard page="menu" action="delete">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(item.id)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </PermissionGuard>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="mb-4">
-                  {item.description}
-                </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="mb-4 text-sm line-clamp-2">
+                    {item.description}
+                  </CardDescription>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <DollarSign className="h-4 w-4 text-green-600" />
-                    <span className="text-xl font-bold text-green-600">
-                      {item.price.toFixed(2)}
-                    </span>
-                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      <DollarSign className="h-4 w-4 text-green-600" />
+                      <span className="text-lg sm:text-xl font-bold text-green-600">
+                        {item.price.toFixed(2)}
+                      </span>
+                    </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={item.available}
-                      onCheckedChange={(checked) =>
-                        handleAvailabilityToggle(item.id, checked)
-                      }
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {item.available ? "Available" : "Unavailable"}
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={item.available}
+                        onCheckedChange={(checked) =>
+                          handleAvailabilityToggle(item.id, checked)
+                        }
+                      />
+                      <span className="text-xs sm:text-sm text-muted-foreground">
+                        {item.available ? "Available" : "Unavailable"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+
+            // On mobile, wrap with SwipeToAction for edit/delete gestures
+            if (isMobile) {
+              return (
+                <SwipeToAction
+                  key={item.id}
+                  leftActions={[
+                    {
+                      id: "edit",
+                      label: "Edit",
+                      icon: <Edit className="h-4 w-4" />,
+                      onAction: () => handleEdit(item),
+                      color: "primary",
+                    },
+                  ]}
+                  rightActions={[
+                    {
+                      id: "delete",
+                      label: "Delete",
+                      icon: <Trash2 className="h-4 w-4" />,
+                      onAction: () => handleDelete(item.id),
+                      color: "destructive",
+                    },
+                  ]}
+                >
+                  {menuItemCard}
+                </SwipeToAction>
+              );
+            }
+
+            return menuItemCard;
+          })}
         </div>
 
         {filteredItems.length === 0 && (

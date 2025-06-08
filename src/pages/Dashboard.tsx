@@ -9,6 +9,7 @@ import {
   DollarSign,
   ExternalLink,
   Package,
+  RefreshCw,
   ShoppingCart,
   TrendingUp,
   Users,
@@ -26,8 +27,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { mockInventory, mockOrders } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
+import { cn } from "@/lib/utils";
 
 interface DashboardStats {
   activeOrders: number;
@@ -42,6 +46,23 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
+
+  // Initialize pull-to-refresh for mobile devices
+  const handleRefresh = async () => {
+    try {
+      const dashboardStats = await RestaurantService.getDashboardStats();
+      setStats(dashboardStats);
+    } catch (error) {
+      console.error("Failed to refresh dashboard stats:", error);
+    }
+  };
+
+  const pullToRefresh = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: 80,
+    disabled: !isMobile,
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -123,10 +144,46 @@ export default function Dashboard() {
 
   return (
     <RestaurantLayout>
-      <div className="space-y-6">
+      <div
+        className={cn(
+          "space-y-4 lg:space-y-6 transition-transform duration-200",
+          pullToRefresh.isPulling && "transform-gpu",
+        )}
+        style={{
+          transform: pullToRefresh.isPulling
+            ? `translateY(${Math.min(pullToRefresh.pullDistance * 0.5, 40)}px)`
+            : undefined,
+        }}
+      >
+        {/* Pull-to-refresh indicator */}
+        {isMobile && pullToRefresh.isPulling && (
+          <div className="flex justify-center pb-2">
+            <div
+              className={cn(
+                "flex items-center space-x-2 text-sm text-muted-foreground transition-opacity",
+                pullToRefresh.shouldRefresh ? "text-primary" : "",
+              )}
+            >
+              <RefreshCw
+                className={cn(
+                  "h-4 w-4 transition-transform duration-200",
+                  pullToRefresh.isRefreshing && "animate-spin",
+                  pullToRefresh.shouldRefresh && "rotate-180",
+                )}
+              />
+              <span>
+                {pullToRefresh.isRefreshing
+                  ? "Refreshing..."
+                  : pullToRefresh.shouldRefresh
+                    ? "Release to refresh"
+                    : "Pull to refresh"}
+              </span>
+            </div>
+          </div>
+        )}
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Today's Revenue
@@ -134,7 +191,7 @@ export default function Dashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 ${stats?.todaySales.toFixed(2)}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -143,7 +200,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Active Orders
@@ -151,14 +208,16 @@ export default function Dashboard() {
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats?.activeOrders}</div>
+              <div className="text-xl sm:text-2xl font-bold">
+                {stats?.activeOrders}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Orders being processed
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Table Occupancy
@@ -166,7 +225,7 @@ export default function Dashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 {stats?.occupiedTables}/{stats?.totalTables}
               </div>
               <Progress
@@ -179,7 +238,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Low Stock Items
@@ -187,7 +246,7 @@ export default function Dashboard() {
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-xl sm:text-2xl font-bold text-red-600">
                 {stats?.lowStockItems}
               </div>
               <p className="text-xs text-muted-foreground">Need restocking</p>
@@ -195,12 +254,12 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 lg:gap-6 xl:grid-cols-2">
           {/* Recent Orders */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
               <div>
-                <CardTitle>Recent Orders</CardTitle>
+                <CardTitle className="text-lg">Recent Orders</CardTitle>
                 <CardDescription>
                   Latest orders from the kitchen
                 </CardDescription>
@@ -209,7 +268,7 @@ export default function Dashboard() {
                 variant="outline"
                 size="sm"
                 onClick={handleViewAllOrders}
-                className="flex items-center space-x-1"
+                className="flex items-center space-x-1 w-full sm:w-auto"
               >
                 <span>View All</span>
                 <ExternalLink className="h-3 w-3" />
@@ -223,7 +282,7 @@ export default function Dashboard() {
                     onClick={() => handleOrderClick(order.id)}
                     className="flex items-center justify-between p-3 rounded-lg border transition-all duration-200 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 hover:shadow-md group"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 min-w-0 flex-1">
                       <div className="flex-shrink-0">
                         {order.status === "preparing" && (
                           <Clock className="h-5 w-5 text-yellow-500" />
@@ -238,11 +297,11 @@ export default function Dashboard() {
                           <CheckCircle className="h-5 w-5 text-blue-500" />
                         )}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium group-hover:text-primary transition-colors truncate">
                           {order.id}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground truncate">
                           Table {order.tableNumber} • {order.serverName}
                         </p>
                         <p className="text-xs text-muted-foreground">
@@ -250,7 +309,7 @@ export default function Dashboard() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-shrink-0">
                       <Badge
                         variant={
                           order.status === "preparing"

@@ -208,50 +208,66 @@ export default function Users() {
     <RestaurantLayout>
       <div className="space-y-6">
         {/* Role Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center space-x-2">
-                <Shield className="h-5 w-5 text-red-500" />
-                <div>
-                  <p className="text-2xl font-bold">{roleStats.admin}</p>
-                  <p className="text-sm text-muted-foreground">Admins</p>
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">
+                    {roleStats.admin}
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Admins
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center space-x-2">
-                <UserCheck className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="text-2xl font-bold">{roleStats.manager}</p>
-                  <p className="text-sm text-muted-foreground">Managers</p>
+                <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">
+                    {roleStats.manager}
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Managers
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center space-x-2">
-                <UsersIcon className="h-5 w-5 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">{roleStats.server}</p>
-                  <p className="text-sm text-muted-foreground">Servers</p>
+                <UsersIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">
+                    {roleStats.server}
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Servers
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
+          <Card className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center space-x-2">
-                <ChefHat className="h-5 w-5 text-orange-500" />
-                <div>
-                  <p className="text-2xl font-bold">{roleStats.kitchen}</p>
-                  <p className="text-sm text-muted-foreground">Kitchen Staff</p>
+                <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">
+                    {roleStats.kitchen}
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Kitchen Staff
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -260,18 +276,18 @@ export default function Users() {
 
         {/* Header Actions */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:space-x-4">
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-[300px]"
+                className="pl-8 w-full sm:w-[300px]"
               />
             </div>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue placeholder="All Roles" />
               </SelectTrigger>
               <SelectContent>
@@ -291,21 +307,20 @@ export default function Users() {
               if (!open) resetForm();
             }}
           >
-            {" "}
             <DialogTrigger asChild>
               <PermissionGuard page="users" action="create">
-                <Button>
+                <Button className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Add User
                 </Button>
               </PermissionGuard>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="mx-4 max-w-[calc(100vw-2rem)] sm:mx-0 sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>
+                <DialogTitle className="text-lg sm:text-xl">
                   {editingUser ? "Edit User" : "Add New User"}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-sm">
                   {editingUser
                     ? "Update user information and permissions."
                     : "Create a new user account for your restaurant staff."}
@@ -314,7 +329,9 @@ export default function Users() {
               <form onSubmit={handleSubmit}>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Full Name
+                    </Label>
                     <Input
                       id="name"
                       value={formData.name}
@@ -329,7 +346,9 @@ export default function Users() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      Email
+                    </Label>
                     <Input
                       id="email"
                       type="email"
@@ -345,7 +364,9 @@ export default function Users() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="role">Role</Label>
+                    <Label htmlFor="role" className="text-sm font-medium">
+                      Role
+                    </Label>
                     <Select
                       value={formData.role}
                       onValueChange={(value: User["role"]) =>
@@ -371,10 +392,12 @@ export default function Users() {
                         setFormData((prev) => ({ ...prev, active: checked }))
                       }
                     />
-                    <Label htmlFor="active">Active account</Label>
+                    <Label htmlFor="active" className="text-sm">
+                      Active account
+                    </Label>
                   </div>
                 </div>
-                <DialogFooter>
+                <DialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
                   <Button
                     type="button"
                     variant="outline"
@@ -382,10 +405,11 @@ export default function Users() {
                       setIsAddDialogOpen(false);
                       resetForm();
                     }}
+                    className="w-full sm:w-auto"
                   >
                     Cancel
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" className="w-full sm:w-auto">
                     {editingUser ? "Update User" : "Create User"}
                   </Button>
                 </DialogFooter>
@@ -399,32 +423,40 @@ export default function Users() {
           {filteredUsers.map((user) => (
             <Card
               key={user.id}
-              className={cn("overflow-hidden", !user.active && "opacity-60")}
+              className={cn(
+                "overflow-hidden hover:shadow-md transition-shadow",
+                !user.active && "opacity-60",
+              )}
             >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarFallback className="bg-orange-100 text-orange-700">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
+                      <AvatarFallback className="bg-orange-100 text-orange-700 text-sm">
                         {getInitials(user.name)}
                       </AvatarFallback>
                     </Avatar>
 
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h3 className="text-lg font-semibold">{user.name}</h3>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:space-x-2">
+                        <h3 className="text-base sm:text-lg font-semibold truncate">
+                          {user.name}
+                        </h3>
                         {!user.active && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs w-fit">
                             Inactive
                           </Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground truncate">
                         {user.email}
                       </p>
                       <div className="flex items-center space-x-2 mt-1">
                         {getRoleIcon(user.role)}
-                        <Badge variant={getRoleBadgeVariant(user.role)}>
+                        <Badge
+                          variant={getRoleBadgeVariant(user.role)}
+                          className="text-xs"
+                        >
                           {user.role.charAt(0).toUpperCase() +
                             user.role.slice(1)}
                         </Badge>
@@ -432,12 +464,12 @@ export default function Users() {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between sm:justify-end sm:space-x-4">
+                    <div className="text-left sm:text-right">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Member since
                       </p>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs sm:text-sm font-medium">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -454,6 +486,7 @@ export default function Users() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(user)}
+                          className="h-8 w-8 p-0 sm:h-9 sm:w-9"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -467,14 +500,14 @@ export default function Users() {
         </div>
 
         {filteredUsers.length === 0 && (
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
                 <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">
                   No users found
                 </h3>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
                   {searchTerm
                     ? "Try adjusting your search criteria."
                     : "Get started by adding your first team member."}

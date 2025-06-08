@@ -5,6 +5,8 @@ import { useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
   ArrowUp,
   ArrowUpDown,
   CheckCircle,
@@ -43,11 +45,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SwipeToAction } from "@/components/ui/swipe-to-action";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/contexts/UserContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { MenuItem, Order, Payment, Table, User } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
+import { cn } from "@/lib/utils";
 
 interface NewOrderItem {
   menuItem: MenuItem;
@@ -58,6 +64,72 @@ interface NewOrderItem {
 export default function Orders() {
   const { currentUser } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isMobile = useIsMobile();
+
+  // Pull-to-refresh functionality
+  const refreshOrders = async () => {
+    try {
+      const [ordersData, menuData, tablesData, usersData] = await Promise.all([
+        RestaurantService.getOrders(),
+        RestaurantService.getMenuItems(),
+        RestaurantService.getTables(),
+        RestaurantService.getUsers(),
+      ]);
+
+      const sortedOrders = [...ordersData].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      setOrders(sortedOrders);
+      setMenuItems(menuData.filter((item) => item.available));
+      setTables(
+        tablesData.filter(
+          (table) =>
+            table.status === "available" || table.status === "occupied",
+        ),
+      );
+
+      const activeServers = usersData.filter(
+        (user) => user.role === "server" && user.active,
+      );
+      setUsers(activeServers);
+    } catch (error) {
+      console.error("Failed to refresh orders:", error);
+    }
+  };
+
+  const { isRefreshing, progress, pullDistance } = usePullToRefresh({
+    onRefresh: refreshOrders,
+    disabled: !isMobile,
+  });
+
+  // Helper function to get next status for swipe gestures
+  const getNextStatus = (currentStatus: Order["status"]): Order["status"] => {
+    const statusFlow = {
+      pending: "preparing",
+      preparing: "ready",
+      ready: "served",
+      served: "completed",
+      completed: "paid",
+      paid: "paid", // No change if already paid
+    } as const;
+
+    return statusFlow[currentStatus] || currentStatus;
+  };
+
+  const getPreviousStatus = (
+    currentStatus: Order["status"],
+  ): Order["status"] => {
+    const statusFlow = {
+      preparing: "pending",
+      ready: "preparing",
+      served: "ready",
+      completed: "served",
+      paid: "served", // Can revert from paid to served if needed
+    } as const;
+
+    return statusFlow[currentStatus] || currentStatus;
+  };
 
   // Helper function to get default server name
   const getDefaultServerName = () => {
@@ -466,105 +538,143 @@ export default function Orders() {
       </RestaurantLayout>
     );
   }
-
   return (
     <RestaurantLayout>
-      <div className="space-y-6">
+      <div
+        className={cn("space-y-6", isMobile && "touch-none select-none")}
+        style={
+          isMobile
+            ? {
+                transform: `translateY(${progress * 60}px)`,
+                transition: isRefreshing ? "transform 0.3s ease-out" : "none",
+              }
+            : undefined
+        }
+      >
+        {/* Pull to refresh indicator */}
+        {isMobile && progress > 0 && (
+          <div className="flex justify-center pb-4">
+            <div
+              className={cn(
+                "flex items-center space-x-2 text-sm text-muted-foreground transition-all duration-200",
+                progress > 0.8 && "text-primary",
+                isRefreshing && "animate-pulse",
+              )}
+            >
+              <div
+                className={cn(
+                  "w-4 h-4 border-2 border-current border-t-transparent rounded-full",
+                  (isRefreshing || progress > 0.8) && "animate-spin",
+                )}
+              />
+              <span>
+                {isRefreshing
+                  ? "Refreshing orders..."
+                  : progress > 0.8
+                    ? "Release to refresh"
+                    : "Pull to refresh"}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Header Actions */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className="relative w-full sm:w-auto">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search orders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-[300px]"
+                className="pl-8 w-full sm:w-[300px]"
               />
             </div>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Orders</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="preparing">Preparing</SelectItem>
-                <SelectItem value="ready">Ready</SelectItem>
-                <SelectItem value="served">Served</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
-                <ArrowUpDown className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">
-                  <div className="flex items-center">
-                    <ArrowDown className="mr-2 h-3 w-3" />
-                    Newest First
-                  </div>
-                </SelectItem>
-                <SelectItem value="oldest">
-                  <div className="flex items-center">
-                    <ArrowUp className="mr-2 h-3 w-3" />
-                    Oldest First
-                  </div>
-                </SelectItem>
-                <SelectItem value="highest-amount">
-                  <div className="flex items-center">
-                    <ArrowDown className="mr-2 h-3 w-3" />
-                    Highest Amount
-                  </div>
-                </SelectItem>
-                <SelectItem value="lowest-amount">
-                  <div className="flex items-center">
-                    <ArrowUp className="mr-2 h-3 w-3" />
-                    Lowest Amount
-                  </div>
-                </SelectItem>
-                <SelectItem value="table-asc">
-                  <div className="flex items-center">
-                    <ArrowUp className="mr-2 h-3 w-3" />
-                    Table Number (Low-High)
-                  </div>
-                </SelectItem>
-                <SelectItem value="table-desc">
-                  <div className="flex items-center">
-                    <ArrowDown className="mr-2 h-3 w-3" />
-                    Table Number (High-Low)
-                  </div>
-                </SelectItem>
-                <SelectItem value="server-asc">
-                  <div className="flex items-center">
-                    <ArrowUp className="mr-2 h-3 w-3" />
-                    Server Name (A-Z)
-                  </div>
-                </SelectItem>
-                <SelectItem value="server-desc">
-                  <div className="flex items-center">
-                    <ArrowDown className="mr-2 h-3 w-3" />
-                    Server Name (Z-A)
-                  </div>
-                </SelectItem>
-                <SelectItem value="status-asc">
-                  <div className="flex items-center">
-                    <ArrowUp className="mr-2 h-3 w-3" />
-                    Status (Pending First)
-                  </div>
-                </SelectItem>
-                <SelectItem value="status-desc">
-                  <div className="flex items-center">
-                    <ArrowDown className="mr-2 h-3 w-3" />
-                    Status (Paid First)
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>{" "}
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Orders</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="preparing">Preparing</SelectItem>
+                  <SelectItem value="ready">Ready</SelectItem>
+                  <SelectItem value="served">Served</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">
+                    <div className="flex items-center">
+                      <ArrowDown className="mr-2 h-3 w-3" />
+                      Newest First
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="oldest">
+                    <div className="flex items-center">
+                      <ArrowUp className="mr-2 h-3 w-3" />
+                      Oldest First
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="highest-amount">
+                    <div className="flex items-center">
+                      <ArrowDown className="mr-2 h-3 w-3" />
+                      Highest Amount
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="lowest-amount">
+                    <div className="flex items-center">
+                      <ArrowUp className="mr-2 h-3 w-3" />
+                      Lowest Amount
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="table-asc">
+                    <div className="flex items-center">
+                      <ArrowUp className="mr-2 h-3 w-3" />
+                      Table Number (Low-High)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="table-desc">
+                    <div className="flex items-center">
+                      <ArrowDown className="mr-2 h-3 w-3" />
+                      Table Number (High-Low)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="server-asc">
+                    <div className="flex items-center">
+                      <ArrowUp className="mr-2 h-3 w-3" />
+                      Server Name (A-Z)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="server-desc">
+                    <div className="flex items-center">
+                      <ArrowDown className="mr-2 h-3 w-3" />
+                      Server Name (Z-A)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="status-asc">
+                    <div className="flex items-center">
+                      <ArrowUp className="mr-2 h-3 w-3" />
+                      Status (Pending First)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="status-desc">
+                    <div className="flex items-center">
+                      <ArrowDown className="mr-2 h-3 w-3" />
+                      Status (Paid First)
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <Dialog
             open={isNewOrderDialogOpen}
             onOpenChange={(open) => {
@@ -573,7 +683,7 @@ export default function Orders() {
             }}
           >
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 New Order
               </Button>
@@ -892,24 +1002,28 @@ export default function Orders() {
 
         {/* Status Tabs */}
         <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
-            <TabsTrigger value="pending">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
+            <TabsTrigger value="all" className="text-xs sm:text-sm">
+              All ({statusCounts.all})
+            </TabsTrigger>
+            <TabsTrigger value="pending" className="text-xs sm:text-sm">
               Pending ({statusCounts.pending})
             </TabsTrigger>
-            <TabsTrigger value="preparing">
+            <TabsTrigger value="preparing" className="text-xs sm:text-sm">
               Preparing ({statusCounts.preparing})
             </TabsTrigger>
-            <TabsTrigger value="ready">
+            <TabsTrigger value="ready" className="text-xs sm:text-sm">
               Ready ({statusCounts.ready})
             </TabsTrigger>
-            <TabsTrigger value="served">
+            <TabsTrigger value="served" className="text-xs sm:text-sm">
               Served ({statusCounts.served})
             </TabsTrigger>
-            <TabsTrigger value="completed">
+            <TabsTrigger value="completed" className="text-xs sm:text-sm">
               Completed ({statusCounts.completed})
             </TabsTrigger>
-            <TabsTrigger value="paid">Paid ({statusCounts.paid})</TabsTrigger>
+            <TabsTrigger value="paid" className="text-xs sm:text-sm">
+              Paid ({statusCounts.paid})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value={selectedStatus} className="mt-6">
@@ -967,154 +1081,215 @@ export default function Orders() {
                   </CardContent>
                 </Card>
               ) : (
-                paginatedOrders.map((order) => (
-                  <Card key={order.id} className="overflow-hidden">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          {getStatusIcon(order.status)}
-                          <div>
-                            <CardTitle className="text-lg">
-                              {order.id}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                              Table {order.tableNumber} • {order.serverName}
-                            </p>
+                paginatedOrders.map((order) => {
+                  const nextStatus = getNextStatus(order.status);
+                  const prevStatus = getPreviousStatus(order.status);
+                  const canAdvance =
+                    nextStatus !== order.status && !order.isPaid;
+                  const canRevert = prevStatus !== order.status;
+
+                  const orderCard = (
+                    <Card key={order.id} className="overflow-hidden">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            {getStatusIcon(order.status)}
+                            <div>
+                              <CardTitle className="text-lg">
+                                {order.id}
+                              </CardTitle>
+                              <p className="text-sm text-muted-foreground">
+                                Table {order.tableNumber} • {order.serverName}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <Badge
+                              variant={getStatusBadgeVariant(order.status)}
+                            >
+                              {order.status}
+                            </Badge>
+                            <span className="text-lg font-semibold">
+                              ${order.total.toFixed(2)}
+                            </span>
+                            {order.isPaid && (
+                              <Badge
+                                variant="outline"
+                                className="text-green-600 border-green-600"
+                              >
+                                <Receipt className="h-3 w-3 mr-1" />
+                                Paid
+                              </Badge>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center space-x-3">
-                          <Badge variant={getStatusBadgeVariant(order.status)}>
-                            {order.status}
-                          </Badge>
-                          <span className="text-lg font-semibold">
-                            ${order.total.toFixed(2)}
-                          </span>
-                          {order.isPaid && (
-                            <Badge
-                              variant="outline"
-                              className="text-green-600 border-green-600"
-                            >
-                              <Receipt className="h-3 w-3 mr-1" />
-                              Paid
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {/* Order Items */}
-                        <div className="space-y-2">
-                          {order.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex justify-between text-sm"
-                            >
-                              <span>
-                                {item.quantity}x {item.menuItem.name}
-                                {item.specialInstructions && (
-                                  <span className="text-muted-foreground ml-2">
-                                    ({item.specialInstructions})
-                                  </span>
-                                )}
-                              </span>
-                              <span>
-                                $
-                                {(item.menuItem.price * item.quantity).toFixed(
-                                  2,
-                                )}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+                      </CardHeader>{" "}
+                      <CardContent>
+                        <div className="space-y-3">
+                          {/* Order Items */}
+                          <div className="space-y-2">
+                            {order.items.map((item) => (
+                              <div
+                                key={item.id}
+                                className="flex justify-between text-sm"
+                              >
+                                <span>
+                                  {item.quantity}x {item.menuItem.name}
+                                  {item.specialInstructions && (
+                                    <span className="text-muted-foreground ml-2">
+                                      ({item.specialInstructions})
+                                    </span>
+                                  )}
+                                </span>
+                                <span>
+                                  $
+                                  {(
+                                    item.menuItem.price * item.quantity
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
 
-                        {/* Order Time and Actions */}
-                        <div className="flex justify-between items-center pt-2 border-t">
-                          <span className="text-xs text-muted-foreground">
-                            Ordered{" "}
-                            {new Date(order.createdAt).toLocaleTimeString()}
-                          </span>{" "}
-                          {/* Status and Payment Actions */}
-                          <div className="flex space-x-2">
-                            {order.status === "pending" && (
-                              <PermissionGuard page="orders" action="edit">
-                                <Button
-                                  size="sm"
-                                  onClick={() =>
-                                    handleStatusChange(order.id, "preparing")
-                                  }
-                                >
-                                  Start Preparing
-                                </Button>
-                              </PermissionGuard>
-                            )}
-                            {order.status === "preparing" && (
-                              <PermissionGuard page="orders" action="edit">
-                                <Button
-                                  size="sm"
-                                  onClick={() =>
-                                    handleStatusChange(order.id, "ready")
-                                  }
-                                >
-                                  Mark Ready
-                                </Button>
-                              </PermissionGuard>
-                            )}
-                            {order.status === "ready" && (
-                              <PermissionGuard page="orders" action="edit">
-                                <Button
-                                  size="sm"
-                                  onClick={() =>
-                                    handleStatusChange(order.id, "served")
-                                  }
-                                >
-                                  Mark Served
-                                </Button>
-                              </PermissionGuard>
-                            )}
-                            {order.status === "served" && !order.isPaid && (
-                              <>
+                          {/* Order Time and Actions */}
+                          <div className="flex justify-between items-center pt-2 border-t">
+                            <span className="text-xs text-muted-foreground">
+                              Ordered{" "}
+                              {new Date(order.createdAt).toLocaleTimeString()}
+                            </span>
+                            {/* Status and Payment Actions */}
+                            <div className="flex space-x-2">
+                              {order.status === "pending" && (
                                 <PermissionGuard page="orders" action="edit">
                                   <Button
                                     size="sm"
-                                    variant="outline"
                                     onClick={() =>
-                                      handleStatusChange(order.id, "completed")
+                                      handleStatusChange(order.id, "preparing")
                                     }
                                   >
-                                    Complete
+                                    Start Preparing
                                   </Button>
                                 </PermissionGuard>
-                                <PermissionGuard page="orders" action="payment">
+                              )}
+                              {order.status === "preparing" && (
+                                <PermissionGuard page="orders" action="edit">
                                   <Button
                                     size="sm"
-                                    onClick={() => openPaymentDialog(order)}
-                                    className="bg-green-600 hover:bg-green-700"
+                                    onClick={() =>
+                                      handleStatusChange(order.id, "ready")
+                                    }
                                   >
-                                    <CreditCard className="h-4 w-4 mr-1" />
-                                    Process Payment
+                                    Mark Ready
                                   </Button>
                                 </PermissionGuard>
-                              </>
-                            )}
-                            {order.status === "completed" && !order.isPaid && (
-                              <PermissionGuard page="orders" action="payment">
-                                <Button
-                                  size="sm"
-                                  onClick={() => openPaymentDialog(order)}
-                                  className="bg-green-600 hover:bg-green-700"
-                                >
-                                  <CreditCard className="h-4 w-4 mr-1" />
-                                  Process Payment
-                                </Button>
-                              </PermissionGuard>
-                            )}
+                              )}
+                              {order.status === "ready" && (
+                                <PermissionGuard page="orders" action="edit">
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      handleStatusChange(order.id, "served")
+                                    }
+                                  >
+                                    Mark Served
+                                  </Button>
+                                </PermissionGuard>
+                              )}
+                              {order.status === "served" && !order.isPaid && (
+                                <>
+                                  <PermissionGuard page="orders" action="edit">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() =>
+                                        handleStatusChange(
+                                          order.id,
+                                          "completed",
+                                        )
+                                      }
+                                    >
+                                      Complete
+                                    </Button>
+                                  </PermissionGuard>
+                                  <PermissionGuard
+                                    page="orders"
+                                    action="payment"
+                                  >
+                                    <Button
+                                      size="sm"
+                                      onClick={() => openPaymentDialog(order)}
+                                      className="bg-green-600 hover:bg-green-700"
+                                    >
+                                      <CreditCard className="h-4 w-4 mr-1" />
+                                      Process Payment
+                                    </Button>
+                                  </PermissionGuard>
+                                </>
+                              )}
+                              {order.status === "completed" &&
+                                !order.isPaid && (
+                                  <PermissionGuard
+                                    page="orders"
+                                    action="payment"
+                                  >
+                                    <Button
+                                      size="sm"
+                                      onClick={() => openPaymentDialog(order)}
+                                      className="bg-green-600 hover:bg-green-700"
+                                    >
+                                      <CreditCard className="h-4 w-4 mr-1" />
+                                      Process Payment
+                                    </Button>
+                                  </PermissionGuard>
+                                )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      </CardContent>
+                    </Card>
+                  );
+
+                  // Wrap with SwipeToAction on mobile
+                  if (isMobile && (canAdvance || canRevert)) {
+                    return (
+                      <SwipeToAction
+                        key={order.id}
+                        leftActions={
+                          canRevert
+                            ? [
+                                {
+                                  id: "revert",
+                                  icon: <ArrowLeft className="h-4 w-4" />,
+                                  label: `Revert to ${prevStatus}`,
+                                  color: "secondary",
+                                  onAction: () =>
+                                    handleStatusChange(order.id, prevStatus),
+                                },
+                              ]
+                            : []
+                        }
+                        rightActions={
+                          canAdvance
+                            ? [
+                                {
+                                  id: "advance",
+                                  icon: <ArrowRight className="h-4 w-4" />,
+                                  label: `Advance to ${nextStatus}`,
+                                  color: "success",
+                                  onAction: () =>
+                                    handleStatusChange(order.id, nextStatus),
+                                },
+                              ]
+                            : []
+                        }
+                      >
+                        {orderCard}
+                      </SwipeToAction>
+                    );
+                  }
+
+                  return orderCard;
+                })
               )}
             </div>
 
