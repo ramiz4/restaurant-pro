@@ -245,7 +245,9 @@ export function PaymentDialog({
             <CardContent>
               <Tabs
                 value={paymentMethod}
-                onValueChange={(value: any) => setPaymentMethod(value)}
+                onValueChange={(value: "cash" | "card" | "mobile") =>
+                  setPaymentMethod(value)
+                }
               >
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger
