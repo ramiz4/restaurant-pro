@@ -58,6 +58,8 @@ export default function Orders() {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [selectedOrderForPayment, setSelectedOrderForPayment] =
     useState<Order | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage] = useState(10);
 
   // New order form state
   const [newOrder, setNewOrder] = useState({
@@ -251,6 +253,19 @@ export default function Orders() {
 
     return matchesSearch && matchesStatus;
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+  const startIndex = (currentPage - 1) * ordersPerPage;
+  const paginatedOrders = filteredOrders.slice(
+    startIndex,
+    startIndex + ordersPerPage,
+  );
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedStatus]);
 
   const getStatusIcon = (status: Order["status"]) => {
     switch (status) {
@@ -619,6 +634,42 @@ export default function Orders() {
           </TabsList>
 
           <TabsContent value={selectedStatus} className="mt-6">
+            {/* Pagination Info */}
+            {filteredOrders.length > 0 && (
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to{" "}
+                  {Math.min(startIndex + ordersPerPage, filteredOrders.length)}{" "}
+                  of {filteredOrders.length} orders
+                </p>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="grid gap-4">
               {filteredOrders.length === 0 ? (
                 <Card>
@@ -637,7 +688,7 @@ export default function Orders() {
                   </CardContent>
                 </Card>
               ) : (
-                filteredOrders.map((order) => (
+                paginatedOrders.map((order) => (
                   <Card key={order.id} className="overflow-hidden">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
@@ -776,6 +827,66 @@ export default function Orders() {
                 ))
               )}
             </div>
+
+            {/* Bottom Pagination */}
+            {filteredOrders.length > ordersPerPage && (
+              <div className="flex justify-center items-center mt-6 space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                >
+                  First
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const pageNum =
+                    Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                  if (pageNum > totalPages) return null;
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={currentPage === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(pageNum)}
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                >
+                  Last
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
