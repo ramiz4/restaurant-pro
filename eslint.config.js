@@ -31,7 +31,6 @@ export default [
     },
     rules: {
       ...typescript.configs.recommended.rules,
-      // Remove unused imports
       "unused-imports/no-unused-imports": "error",
       "unused-imports/no-unused-vars": [
         "warn",
@@ -42,10 +41,7 @@ export default [
           argsIgnorePattern: "^_",
         },
       ],
-      // Sort imports - disabled strict ordering rules
-      // "import/order": "off",
-      // Disable some strict rules for better DX
-      "@typescript-eslint/no-unused-vars": "off", // handled by unused-imports
+      "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-empty-object-type": "warn",
       "no-case-declarations": "warn",
