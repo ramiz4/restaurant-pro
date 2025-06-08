@@ -51,7 +51,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
     navigate("/login");
   };
 
-  // Format date and time for European Balkan format
+  // Format date and time for European Balkan format with English day names
   const formatDateTime = (date: Date) => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -60,7 +60,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
     const minutes = date.getMinutes().toString().padStart(2, "0");
     const seconds = date.getSeconds().toString().padStart(2, "0");
 
-    const weekdays = ["Ned", "Pon", "Uto", "Sre", "Čet", "Pet", "Sub"];
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dayName = weekdays[date.getDay()];
 
     return `${dayName}, ${day}.${month}.${year}, ${hours}:${minutes}:${seconds}`;
