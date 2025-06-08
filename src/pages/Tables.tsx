@@ -236,23 +236,26 @@ export default function Tables() {
         </div>
 
         {/* Table Grid */}
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tables.map((table) => (
             <Card
               key={table.id}
               className={cn(
-                "overflow-hidden transition-all duration-200 hover:shadow-md",
+                "overflow-hidden transition-all duration-200 hover:shadow-md min-w-0",
                 getStatusColor(table.status),
               )}
             >
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">
+                <div className="space-y-2">
+                  <CardTitle className="text-lg font-semibold">
                     Table {table.number}
                   </CardTitle>
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(table.status)}
-                    <Badge variant={getStatusBadgeVariant(table.status)}>
+                    <Badge
+                      variant={getStatusBadgeVariant(table.status)}
+                      className="text-xs"
+                    >
                       {table.status}
                     </Badge>
                   </div>
