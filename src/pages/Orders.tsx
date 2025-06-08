@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { PaymentDialog } from "@/components/restaurant/PaymentDialog";
+import { useUser } from "@/contexts/UserContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -60,7 +61,16 @@ interface NewOrderItem {
 }
 
 export default function Orders() {
+  const { currentUser } = useUser();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Helper function to get default server name
+  const getDefaultServerName = () => {
+    return currentUser && (currentUser.role === "Server" || currentUser.role === "server") 
+      ? currentUser.name 
+      : "";
+  };
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
@@ -81,7 +91,7 @@ export default function Orders() {
   // New order form state
   const [newOrder, setNewOrder] = useState({
     tableNumber: "",
-    serverName: "",
+    serverName: getDefaultServerName(),
     notes: "",
   });
   const [orderItems, setOrderItems] = useState<NewOrderItem[]>([]);
@@ -267,10 +277,9 @@ export default function Orders() {
       console.error("Failed to create order:", error);
       alert("Failed to create order. Please try again.");
     }
-  };
-
-  const resetNewOrderForm = () => {
-    setNewOrder({ tableNumber: "", serverName: "", notes: "" });
+  };  const resetNewOrderForm = () => {
+    // Preselect current user as server if they are a server
+    setNewOrder({ tableNumber: "", serverName: getDefaultServerName(), notes: "" });
     setOrderItems([]);
     setSelectedMenuItem("");
     setMenuItemSearch("");
