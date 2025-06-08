@@ -38,6 +38,7 @@ export default function Tables() {
   const [loading, setLoading] = useState(true);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [isReservationDialogOpen, setIsReservationDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<Table["status"][]>([]);
 
   // Reservation form state
   const [reservationData, setReservationData] = useState({
@@ -156,6 +157,21 @@ export default function Tables() {
     cleaning: tables.filter((t) => t.status === "cleaning").length,
   };
 
+  // Filter tables based on selected statuses
+  const filteredTables =
+    statusFilter.length === 0
+      ? tables
+      : tables.filter((table) => statusFilter.includes(table.status));
+
+  // Toggle filter for a specific status
+  const toggleStatusFilter = (status: Table["status"]) => {
+    setStatusFilter((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status],
+    );
+  };
+
   if (loading) {
     return (
       <RestaurantLayout>
@@ -184,60 +200,125 @@ export default function Tables() {
   return (
     <RestaurantLayout>
       <div className="space-y-6">
-        {/* Status Overview */}
+        {/* Status Overview - Clickable Filters */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">{statusStats.available}</p>
-                  <p className="text-sm text-muted-foreground">Available</p>
+          <Card
+            className={cn(
+              "cursor-pointer transition-all duration-200 hover:shadow-md",
+              statusFilter.includes("available")
+                ? "ring-2 ring-green-500 bg-green-50 dark:bg-green-950"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800",
+            )}
+            onClick={() => toggleStatusFilter("available")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-2xl font-bold">
+                    {statusStats.available}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Available
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="text-2xl font-bold">{statusStats.occupied}</p>
-                  <p className="text-sm text-muted-foreground">Occupied</p>
+          <Card
+            className={cn(
+              "cursor-pointer transition-all duration-200 hover:shadow-md",
+              statusFilter.includes("occupied")
+                ? "ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800",
+            )}
+            onClick={() => toggleStatusFilter("occupied")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <Users className="h-5 w-5 text-blue-500 flex-shrink-0" />
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-2xl font-bold">
+                    {statusStats.occupied}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Occupied
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-purple-500" />
-                <div>
-                  <p className="text-2xl font-bold">{statusStats.reserved}</p>
-                  <p className="text-sm text-muted-foreground">Reserved</p>
+          <Card
+            className={cn(
+              "cursor-pointer transition-all duration-200 hover:shadow-md",
+              statusFilter.includes("reserved")
+                ? "ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-950"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800",
+            )}
+            onClick={() => toggleStatusFilter("reserved")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <Calendar className="h-5 w-5 text-purple-500 flex-shrink-0" />
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-2xl font-bold">
+                    {statusStats.reserved}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Reserved
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-2">
-                <Sparkles className="h-5 w-5 text-yellow-500" />
-                <div>
-                  <p className="text-2xl font-bold">{statusStats.cleaning}</p>
-                  <p className="text-sm text-muted-foreground">Cleaning</p>
+          <Card
+            className={cn(
+              "cursor-pointer transition-all duration-200 hover:shadow-md",
+              statusFilter.includes("cleaning")
+                ? "ring-2 ring-yellow-500 bg-yellow-50 dark:bg-yellow-950"
+                : "hover:bg-gray-50 dark:hover:bg-gray-800",
+            )}
+            onClick={() => toggleStatusFilter("cleaning")}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <Sparkles className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+                <div className="flex items-baseline space-x-2">
+                  <span className="text-2xl font-bold">
+                    {statusStats.cleaning}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Cleaning
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
+        {/* Filter Status */}
+        {statusFilter.length > 0 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredTables.length} tables filtered by:{" "}
+              {statusFilter.join(", ")}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setStatusFilter([])}
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
+
         {/* Table Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {tables.map((table) => (
+          {filteredTables.map((table) => (
             <Card
               key={table.id}
               className={cn(
