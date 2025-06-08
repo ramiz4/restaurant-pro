@@ -26,7 +26,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import RestaurantService from "@/lib/restaurant-services";
-import { Order, MenuItem, Table, OrderItem, Payment } from "@/lib/mock-data";
+import {
+  Order,
+  MenuItem,
+  Table,
+  OrderItem,
+  Payment,
+  User,
+} from "@/lib/mock-data";
 import {
   Search,
   Plus,
@@ -56,6 +63,7 @@ export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || "",
@@ -83,11 +91,14 @@ export default function Orders() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ordersData, menuData, tablesData] = await Promise.all([
-          RestaurantService.getOrders(),
-          RestaurantService.getMenuItems(),
-          RestaurantService.getTables(),
-        ]);
+        const [ordersData, menuData, tablesData, usersData] = await Promise.all(
+          [
+            RestaurantService.getOrders(),
+            RestaurantService.getMenuItems(),
+            RestaurantService.getTables(),
+            RestaurantService.getUsers(),
+          ],
+        );
         // Sort orders by creation time (newest first)
         const sortedOrders = [...ordersData].sort(
           (a, b) =>
@@ -100,6 +111,10 @@ export default function Orders() {
             (table) =>
               table.status === "available" || table.status === "occupied",
           ),
+        );
+        // Filter for active servers only
+        setUsers(
+          usersData.filter((user) => user.role === "server" && user.active),
         );
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -554,18 +569,26 @@ export default function Orders() {
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="server">Server Name</Label>
-                      <Input
-                        id="server"
+                      <Select
                         value={newOrder.serverName}
-                        onChange={(e) =>
+                        onValueChange={(value) =>
                           setNewOrder((prev) => ({
                             ...prev,
-                            serverName: e.target.value,
+                            serverName: value,
                           }))
                         }
-                        placeholder="Enter server name"
-                        required
-                      />
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select server" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {users.map((user) => (
+                            <SelectItem key={user.id} value={user.name}>
+                              {user.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
