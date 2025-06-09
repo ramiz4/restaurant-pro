@@ -322,6 +322,16 @@ export default function Tables() {
         <div
           className="space-y-4 sm:space-y-6"
           {...(isMobile ? pullToRefresh : {})}
+          style={
+            isMobile
+              ? {
+                  transform: `translateY(${pullToRefresh.progress * 60}px)`,
+                  transition: pullToRefresh.isRefreshing
+                    ? "transform 0.3s ease-out"
+                    : "none",
+                }
+              : undefined
+          }
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -334,32 +344,30 @@ export default function Tables() {
             </div>
           </div>
 
-          {/* Pull to Refresh Indicator */}
-          {pullToRefresh.isPulling && (
-            <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
-              <div className="flex flex-col items-center justify-center py-4">
+          {/* Pull to refresh indicator */}
+          {isMobile && pullToRefresh.progress > 0 && (
+            <div className="flex justify-center pb-4">
+              <div
+                className={cn(
+                  "flex items-center space-x-2 text-sm text-muted-foreground transition-all duration-200",
+                  pullToRefresh.shouldRefresh && "text-primary",
+                )}
+              >
                 <div
-                  className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full transition-transform duration-200"
-                  style={{
-                    transform: `rotate(${pullToRefresh.progress * 360}deg)`,
-                  }}
+                  className={cn(
+                    "w-5 h-5 border-2 border-current border-t-transparent rounded-full",
+                    (pullToRefresh.isRefreshing ||
+                      pullToRefresh.shouldRefresh) &&
+                      "animate-spin",
+                  )}
                 />
-                <p className="text-xs text-muted-foreground mt-2">
-                  {pullToRefresh.shouldRefresh
-                    ? "Release to refresh"
-                    : "Pull to refresh"}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {pullToRefresh.isRefreshing && (
-            <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm">
-              <div className="flex flex-col items-center justify-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Refreshing tables...
-                </p>
+                <span>
+                  {pullToRefresh.isRefreshing
+                    ? "Refreshing tables..."
+                    : pullToRefresh.shouldRefresh
+                      ? "Release to refresh"
+                      : "Pull to refresh"}
+                </span>
               </div>
             </div>
           )}

@@ -271,64 +271,42 @@ export default function Inventory() {
   }
   return (
     <RestaurantLayout>
-      {/* Pull-to-refresh visual feedback for mobile */}
-      {isMobile && (
-        <div
-          className={cn(
-            "absolute top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b",
-            "transition-all duration-300 ease-out",
-            isRefreshing || pullDistance > 50
-              ? "opacity-100 transform translate-y-0"
-              : "opacity-0 transform -translate-y-full",
-          )}
-          style={{
-            height: `${Math.min(pullDistance, 80)}px`,
-          }}
-        >
-          <div className="flex items-center justify-center h-full px-4">
-            <div className="flex items-center space-x-3">
+      <div
+        className="space-y-4 sm:space-y-6"
+        style={
+          isMobile
+            ? {
+                transform: `translateY(${progress * 60}px)`,
+                transition: isRefreshing ? "transform 0.3s ease-out" : "none",
+              }
+            : undefined
+        }
+      >
+        {/* Pull to refresh indicator */}
+        {isMobile && progress > 0 && (
+          <div className="flex justify-center pb-4">
+            <div
+              className={cn(
+                "flex items-center space-x-2 text-sm text-muted-foreground transition-all duration-200",
+                progress > 0.8 && "text-primary",
+              )}
+            >
               <div
                 className={cn(
-                  "w-5 h-5 border-2 border-primary border-t-transparent rounded-full",
-                  isRefreshing ? "animate-spin" : "",
+                  "w-5 h-5 border-2 border-current border-t-transparent rounded-full",
+                  (isRefreshing || progress > 0.8) && "animate-spin",
                 )}
               />
-              <span className="text-sm font-medium text-muted-foreground">
+              <span>
                 {isRefreshing
                   ? "Refreshing inventory..."
-                  : pullDistance > 50
+                  : progress > 0.8
                     ? "Release to refresh"
                     : "Pull to refresh"}
               </span>
-              {progress > 0 && (
-                <div className="w-16 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-300 ease-out rounded-full"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Main content with mobile touch gestures support */}
-      <div
-        className={cn(
-          "space-y-4 sm:space-y-6",
-          isMobile && "touch-none select-none",
-          isMobile &&
-            pullDistance > 0 &&
-            "transform transition-transform duration-200 ease-out",
         )}
-        style={{
-          transform:
-            isMobile && pullDistance > 0
-              ? `translateY(${Math.min(pullDistance, 80)}px)`
-              : undefined,
-        }}
-      >
         {/* Stats Overview */}
         <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-3">
           <Card>

@@ -166,7 +166,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
           <div className="flex">
             {/* Mobile Header */}
-            <div className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
+            <div className="fixed top-0 left-0 right-0 z-[60] flex h-16 items-center justify-between border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4">
               <div className="flex items-center space-x-3">
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm" className="p-2">

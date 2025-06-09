@@ -63,7 +63,10 @@ export function usePullToRefresh(options: PullToRefreshOptions) {
         setState((prev) => ({ ...prev, isPulling: true }));
       }
 
-      if (pullStarted.current) {
+      if (pullStarted.current && pullDistance > 10) {
+        // Only prevent default when we're actively pulling to refresh
+        e.preventDefault();
+
         // Reduce pull distance for a more natural feel
         const dampedDistance = Math.min(
           pullDistance * 0.6,

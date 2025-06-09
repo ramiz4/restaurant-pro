@@ -544,7 +544,7 @@ export default function Orders() {
   return (
     <RestaurantLayout>
       <div
-        className={cn("space-y-6", isMobile && "touch-none select-none")}
+        className="space-y-6"
         style={
           isMobile
             ? {
