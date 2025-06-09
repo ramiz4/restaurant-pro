@@ -258,22 +258,26 @@ export default function Menu() {
         )}
 
         {/* Header Actions */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-            <div className="relative w-full sm:w-auto">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Search and Category Filter Row */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            {/* Search Input */}
+            <div className="relative w-full sm:flex-1 lg:w-80">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search menu items..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full sm:w-[300px]"
+                className="pl-8"
               />
             </div>
+
+            {/* Category Filter */}
             <Select
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -287,6 +291,7 @@ export default function Menu() {
             </Select>
           </div>
 
+          {/* Add Menu Item Button */}
           <Dialog
             open={isAddDialogOpen}
             onOpenChange={(open) => {
@@ -296,7 +301,7 @@ export default function Menu() {
           >
             <PermissionGuard page="menu" action="create">
               <DialogTrigger asChild>
-                <Button className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto lg:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Menu Item
                 </Button>
