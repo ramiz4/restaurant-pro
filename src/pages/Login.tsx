@@ -168,6 +168,7 @@ export default function Login() {
                         }))
                       }
                       className="pl-10 h-12 bg-white/50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-600 focus:border-orange-500 focus:ring-orange-500"
+                      autoComplete="email"
                       required
                     />
                   </div>
@@ -194,6 +195,7 @@ export default function Login() {
                         }))
                       }
                       className="pl-10 pr-10 h-12 bg-white/50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-600 focus:border-orange-500 focus:ring-orange-500"
+                      autoComplete="current-password"
                       required
                     />
                     <Button
