@@ -80,7 +80,11 @@ export default function Inventory() {
     }
   };
 
-  const { isRefreshing, progress, pullDistance } = usePullToRefresh({
+  const {
+    isRefreshing,
+    progress,
+    pullDistance: _pullDistance,
+  } = usePullToRefresh({
     onRefresh: refreshInventory,
     disabled: !isMobile,
   });
