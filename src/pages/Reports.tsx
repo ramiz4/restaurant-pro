@@ -267,8 +267,21 @@ export default function Reports() {
                         dataKey="date"
                         fontSize={12}
                         interval="preserveStartEnd"
+                        tick={true}
+                        axisLine={true}
+                        tickLine={true}
+                        type="category"
+                        scale="auto"
                       />
-                      <YAxis fontSize={12} />
+                      <YAxis
+                        fontSize={12}
+                        tick={true}
+                        axisLine={true}
+                        tickLine={true}
+                        type="number"
+                        scale="auto"
+                        orientation="left"
+                      />
                       <Tooltip
                         formatter={(value, name) => [
                           name === "sales" ? `$${value}` : value,
@@ -305,8 +318,21 @@ export default function Reports() {
                         dataKey="date"
                         fontSize={12}
                         interval="preserveStartEnd"
+                        tick={true}
+                        axisLine={true}
+                        tickLine={true}
+                        type="category"
+                        scale="auto"
                       />
-                      <YAxis fontSize={12} />
+                      <YAxis
+                        fontSize={12}
+                        tick={true}
+                        axisLine={true}
+                        tickLine={true}
+                        type="number"
+                        scale="auto"
+                        orientation="left"
+                      />
                       <Tooltip formatter={(value) => [value, "Orders"]} />
                       <Bar dataKey="orders" fill="#118ab2" />
                     </BarChart>
