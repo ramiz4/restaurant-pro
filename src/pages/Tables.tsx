@@ -78,28 +78,34 @@ function TableCard({
   const getStatusColor = (status: Table["status"]) => {
     switch (status) {
       case "available":
-        return "border-emerald-500/30 bg-emerald-50/50 hover:bg-emerald-100/70";
+        return "border-emerald-500/30 bg-emerald-50/50 hover:bg-emerald-100/70 dark:border-emerald-500/40 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40";
       case "occupied":
-        return "border-red-500/30 bg-red-50/50 hover:bg-red-100/70";
+        return "border-red-500/30 bg-red-50/50 hover:bg-red-100/70 dark:border-red-500/40 dark:bg-red-950/30 dark:hover:bg-red-900/40";
       case "reserved":
-        return "border-blue-500/30 bg-blue-50/50 hover:bg-blue-100/70";
+        return "border-blue-500/30 bg-blue-50/50 hover:bg-blue-100/70 dark:border-blue-500/40 dark:bg-blue-950/30 dark:hover:bg-blue-900/40";
       case "cleaning":
-        return "border-yellow-500/30 bg-yellow-50/50 hover:bg-yellow-100/70";
+        return "border-yellow-500/30 bg-yellow-50/50 hover:bg-yellow-100/70 dark:border-yellow-500/40 dark:bg-yellow-950/30 dark:hover:bg-yellow-900/40";
       default:
-        return "border-gray-300";
+        return "border-gray-300 dark:border-gray-600";
     }
   };
 
   const getStatusIcon = (status: Table["status"]) => {
     switch (status) {
       case "available":
-        return <CheckCircle className="w-4 h-4 text-emerald-600" />;
+        return (
+          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        );
       case "occupied":
-        return <Users className="w-4 h-4 text-red-600" />;
+        return <Users className="w-4 h-4 text-red-600 dark:text-red-400" />;
       case "reserved":
-        return <Calendar className="w-4 h-4 text-blue-600" />;
+        return (
+          <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        );
       case "cleaning":
-        return <Sparkles className="w-4 h-4 text-yellow-600" />;
+        return (
+          <Sparkles className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+        );
       default:
         return null;
     }
@@ -364,7 +370,7 @@ export default function Tables() {
               className={cn(
                 "cursor-pointer transition-colors border-2",
                 statusFilter.includes("available")
-                  ? "border-green-500 bg-green-50"
+                  ? "border-green-500 bg-green-50 dark:border-green-400 dark:bg-green-950/30"
                   : "hover:bg-muted/50",
               )}
               onClick={() => toggleStatusFilter("available")}
@@ -375,11 +381,11 @@ export default function Tables() {
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       Available
                     </p>
-                    <p className="text-xl sm:text-2xl font-bold text-green-600">
+                    <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400">
                       {statusStats.available}
                     </p>
                   </div>
-                  <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                  <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 dark:text-green-400" />
                 </div>
               </CardContent>
             </Card>
@@ -388,7 +394,7 @@ export default function Tables() {
               className={cn(
                 "cursor-pointer transition-colors border-2",
                 statusFilter.includes("occupied")
-                  ? "border-blue-500 bg-blue-50"
+                  ? "border-red-500 bg-red-50 dark:border-red-400 dark:bg-red-950/30"
                   : "hover:bg-muted/50",
               )}
               onClick={() => toggleStatusFilter("occupied")}
@@ -399,11 +405,11 @@ export default function Tables() {
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       Occupied
                     </p>
-                    <p className="text-xl sm:text-2xl font-bold text-blue-600">
+                    <p className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400">
                       {statusStats.occupied}
                     </p>
                   </div>
-                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                  <Users className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 dark:text-red-400" />
                 </div>
               </CardContent>
             </Card>
@@ -412,7 +418,7 @@ export default function Tables() {
               className={cn(
                 "cursor-pointer transition-colors border-2",
                 statusFilter.includes("reserved")
-                  ? "border-yellow-500 bg-yellow-50"
+                  ? "border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-950/30"
                   : "hover:bg-muted/50",
               )}
               onClick={() => toggleStatusFilter("reserved")}
@@ -423,11 +429,11 @@ export default function Tables() {
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       Reserved
                     </p>
-                    <p className="text-xl sm:text-2xl font-bold text-yellow-600">
+                    <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {statusStats.reserved}
                     </p>
                   </div>
-                  <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600" />
+                  <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 dark:text-blue-400" />
                 </div>
               </CardContent>
             </Card>
@@ -436,7 +442,7 @@ export default function Tables() {
               className={cn(
                 "cursor-pointer transition-colors border-2",
                 statusFilter.includes("cleaning")
-                  ? "border-purple-500 bg-purple-50"
+                  ? "border-yellow-500 bg-yellow-50 dark:border-yellow-400 dark:bg-yellow-950/30"
                   : "hover:bg-muted/50",
               )}
               onClick={() => toggleStatusFilter("cleaning")}
@@ -447,11 +453,11 @@ export default function Tables() {
                     <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                       Cleaning
                     </p>
-                    <p className="text-xl sm:text-2xl font-bold text-purple-600">
+                    <p className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400">
                       {statusStats.cleaning}
                     </p>
                   </div>
-                  <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
+                  <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-600 dark:text-yellow-400" />
                 </div>
               </CardContent>
             </Card>
