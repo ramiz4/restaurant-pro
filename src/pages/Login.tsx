@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   ArrowRight,
@@ -38,7 +38,17 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { setCurrentUser } = useUser();
+  const location = useLocation();
+  const { setCurrentUser, currentUser } = useUser();
+
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (currentUser) {
+      navigate(from, { replace: true });
+    }
+  }, [currentUser, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +59,7 @@ export default function Login() {
       const user = getUserByEmail(formData.email);
       setCurrentUser(user);
       setLoading(false);
-      navigate("/dashboard");
+      navigate(from, { replace: true });
     }, 1200);
   };
 
@@ -95,7 +105,7 @@ export default function Login() {
       const user = getUserByEmail(email);
       setCurrentUser(user);
       setLoading(false);
-      navigate("/dashboard");
+      navigate(from, { replace: true });
     }, 1000);
   };
 
