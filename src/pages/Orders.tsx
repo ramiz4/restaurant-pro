@@ -582,102 +582,92 @@ export default function Orders() {
           </div>
         )}
         {/* Header Actions */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-            <div className="relative w-full sm:w-auto">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          {/* Search and Controls Row */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+            {/* Search Input */}
+            <div className="relative w-full sm:flex-1 lg:w-80">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search orders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full sm:w-[300px]"
+                className="pl-8"
               />
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                <SelectTrigger className="w-full sm:w-[140px]">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Orders</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="preparing">Preparing</SelectItem>
-                  <SelectItem value="ready">Ready</SelectItem>
-                  <SelectItem value="served">Served</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <ArrowUpDown className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">
-                    <div className="flex items-center">
-                      <ArrowDown className="mr-2 h-3 w-3" />
-                      Newest First
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="oldest">
-                    <div className="flex items-center">
-                      <ArrowUp className="mr-2 h-3 w-3" />
-                      Oldest First
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="highest-amount">
-                    <div className="flex items-center">
-                      <ArrowDown className="mr-2 h-3 w-3" />
-                      Highest Amount
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="lowest-amount">
-                    <div className="flex items-center">
-                      <ArrowUp className="mr-2 h-3 w-3" />
-                      Lowest Amount
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="table-asc">
-                    <div className="flex items-center">
-                      <ArrowUp className="mr-2 h-3 w-3" />
-                      Table Number (Low-High)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="table-desc">
-                    <div className="flex items-center">
-                      <ArrowDown className="mr-2 h-3 w-3" />
-                      Table Number (High-Low)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="server-asc">
-                    <div className="flex items-center">
-                      <ArrowUp className="mr-2 h-3 w-3" />
-                      Server Name (A-Z)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="server-desc">
-                    <div className="flex items-center">
-                      <ArrowDown className="mr-2 h-3 w-3" />
-                      Server Name (Z-A)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="status-asc">
-                    <div className="flex items-center">
-                      <ArrowUp className="mr-2 h-3 w-3" />
-                      Status (Pending First)
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="status-desc">
-                    <div className="flex items-center">
-                      <ArrowDown className="mr-2 h-3 w-3" />
-                      Status (Paid First)
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+            {/* Sort Control */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-48">
+                <ArrowUpDown className="mr-2 h-4 w-4" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Newest First
+                  </div>
+                </SelectItem>
+                <SelectItem value="oldest">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Oldest First
+                  </div>
+                </SelectItem>
+                <SelectItem value="highest-amount">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Highest Amount
+                  </div>
+                </SelectItem>
+                <SelectItem value="lowest-amount">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Lowest Amount
+                  </div>
+                </SelectItem>
+                <SelectItem value="table-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Table Number (Low-High)
+                  </div>
+                </SelectItem>
+                <SelectItem value="table-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Table Number (High-Low)
+                  </div>
+                </SelectItem>
+                <SelectItem value="server-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Server Name (A-Z)
+                  </div>
+                </SelectItem>
+                <SelectItem value="server-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Server Name (Z-A)
+                  </div>
+                </SelectItem>
+                <SelectItem value="status-asc">
+                  <div className="flex items-center">
+                    <ArrowUp className="mr-2 h-3 w-3" />
+                    Status (Pending First)
+                  </div>
+                </SelectItem>
+                <SelectItem value="status-desc">
+                  <div className="flex items-center">
+                    <ArrowDown className="mr-2 h-3 w-3" />
+                    Status (Paid First)
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* New Order Button */}
           <Dialog
             open={isNewOrderDialogOpen}
             onOpenChange={(open) => {
@@ -686,7 +676,7 @@ export default function Orders() {
             }}
           >
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto lg:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 New Order
               </Button>
