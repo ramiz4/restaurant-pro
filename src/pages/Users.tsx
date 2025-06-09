@@ -275,19 +275,19 @@ export default function Users() {
         </div>
 
         {/* Header Actions */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:space-x-4">
-            <div className="relative">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:space-y-0 md:space-x-4 w-full lg:w-auto">
+            <div className="relative w-full md:w-auto">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full sm:w-[300px]"
+                className="pl-8 w-full md:w-[300px]"
               />
             </div>
             <Select value={selectedRole} onValueChange={setSelectedRole}>
-              <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectTrigger className="w-full md:w-[140px]">
                 <SelectValue placeholder="All Roles" />
               </SelectTrigger>
               <SelectContent>
@@ -309,7 +309,7 @@ export default function Users() {
           >
             <DialogTrigger asChild>
               <PermissionGuard page="users" action="create">
-                <Button className="w-full sm:w-auto">
+                <Button className="w-full lg:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Add User
                 </Button>
@@ -429,8 +429,8 @@ export default function Users() {
               )}
             >
               <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center space-x-3 sm:space-x-4">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
                     <Avatar className="h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0">
                       <AvatarFallback className="bg-orange-100 text-orange-700 text-sm">
                         {getInitials(user.name)}
@@ -464,8 +464,8 @@ export default function Users() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end sm:space-x-4">
-                    <div className="text-left sm:text-right">
+                  <div className="flex flex-col space-y-3 lg:flex-row lg:items-center lg:justify-end lg:space-y-0 lg:space-x-4 lg:ml-4">
+                    <div className="text-left lg:text-right">
                       <p className="text-xs sm:text-sm text-muted-foreground">
                         Member since
                       </p>
@@ -474,23 +474,28 @@ export default function Users() {
                       </p>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={user.active}
-                        onCheckedChange={(checked) =>
-                          handleToggleActive(user.id, checked)
-                        }
-                      />
-                      <PermissionGuard page="users" action="edit">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(user)}
-                          className="h-8 w-8 p-0 sm:h-9 sm:w-9"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </PermissionGuard>
+                    <div className="flex items-center justify-between lg:justify-end space-x-2">
+                      <span className="text-xs text-muted-foreground lg:hidden">
+                        {user.active ? "Active" : "Inactive"}
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={user.active}
+                          onCheckedChange={(checked) =>
+                            handleToggleActive(user.id, checked)
+                          }
+                        />
+                        <PermissionGuard page="users" action="edit">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(user)}
+                            className="h-8 w-8 p-0 sm:h-9 sm:w-9"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </PermissionGuard>
+                      </div>
                     </div>
                   </div>
                 </div>
