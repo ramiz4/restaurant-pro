@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, forwardRef } from "react";
 
 import { usePermissions } from "@/hooks/use-permissions";
 
@@ -9,23 +9,22 @@ interface PermissionGuardProps {
   fallback?: ReactNode;
 }
 
-export function PermissionGuard({
-  children,
-  page,
-  action,
-  fallback = null,
-}: PermissionGuardProps) {
-  const { hasPageAccess, hasActionAccess } = usePermissions();
+export const PermissionGuard = forwardRef<HTMLElement, PermissionGuardProps>(
+  ({ children, page, action, fallback = null }, ref) => {
+    const { hasPageAccess, hasActionAccess } = usePermissions();
 
-  // Check page access first
-  if (!hasPageAccess(page)) {
-    return <>{fallback}</>;
-  }
+    // Check page access first
+    if (!hasPageAccess(page)) {
+      return <>{fallback}</>;
+    }
 
-  // If action is specified, check action access
-  if (action && !hasActionAccess(page, action)) {
-    return <>{fallback}</>;
-  }
+    // If action is specified, check action access
+    if (action && !hasActionAccess(page, action)) {
+      return <>{fallback}</>;
+    }
 
-  return <>{children}</>;
-}
+    return <>{children}</>;
+  },
+);
+
+PermissionGuard.displayName = "PermissionGuard";

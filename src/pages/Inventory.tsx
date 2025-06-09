@@ -383,22 +383,22 @@ export default function Inventory() {
           </Card>
         </div>
         {/* Header Actions */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-            <div className="relative w-full sm:w-auto">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4 w-full lg:w-auto">
+            <div className="relative w-full md:w-auto">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search inventory..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 w-full sm:w-[300px]"
+                className="pl-8 w-full md:w-[300px]"
               />
             </div>
             <Select
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectTrigger className="w-full md:w-[160px]">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
@@ -421,13 +421,13 @@ export default function Inventory() {
             {" "}
             <DialogTrigger asChild>
               <PermissionGuard page="inventory" action="create">
-                <Button className="w-full sm:w-auto">
+                <Button className="w-full lg:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Item
                 </Button>
               </PermissionGuard>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] mx-4 sm:mx-0">
+            <DialogContent className="md:max-w-[500px] mx-4 md:mx-0">
               <DialogHeader>
                 <DialogTitle>
                   {editingItem ? "Edit Inventory Item" : "Add Inventory Item"}
