@@ -581,7 +581,6 @@ export default function Orders() {
             </div>
           </div>
         )}
-
         {/* Header Actions */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
@@ -1002,34 +1001,72 @@ export default function Orders() {
               </PermissionGuard>
             </DialogContent>
           </Dialog>
+        </div>{" "}
+        {/* Status Filter - Mobile/Tablet Dropdown / Desktop Tabs */}
+        <div className="space-y-4">
+          {/* Mobile & Tablet: Dropdown (up to 1024px) */}
+          <div className="lg:hidden">
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  All Orders ({statusCounts.all})
+                </SelectItem>
+                <SelectItem value="pending">
+                  Pending ({statusCounts.pending})
+                </SelectItem>
+                <SelectItem value="preparing">
+                  Preparing ({statusCounts.preparing})
+                </SelectItem>
+                <SelectItem value="ready">
+                  Ready ({statusCounts.ready})
+                </SelectItem>
+                <SelectItem value="served">
+                  Served ({statusCounts.served})
+                </SelectItem>
+                <SelectItem value="completed">
+                  Completed ({statusCounts.completed})
+                </SelectItem>
+                <SelectItem value="paid">Paid ({statusCounts.paid})</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Desktop: Tabs (1024px and above) */}
+          <Tabs
+            value={selectedStatus}
+            onValueChange={setSelectedStatus}
+            className="hidden lg:block"
+          >
+            <TabsList className="grid w-full grid-cols-7 gap-1">
+              <TabsTrigger value="all" className="text-sm">
+                All ({statusCounts.all})
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="text-sm">
+                Pending ({statusCounts.pending})
+              </TabsTrigger>
+              <TabsTrigger value="preparing" className="text-sm">
+                Preparing ({statusCounts.preparing})
+              </TabsTrigger>
+              <TabsTrigger value="ready" className="text-sm">
+                Ready ({statusCounts.ready})
+              </TabsTrigger>
+              <TabsTrigger value="served" className="text-sm">
+                Served ({statusCounts.served})
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="text-sm">
+                Completed ({statusCounts.completed})
+              </TabsTrigger>
+              <TabsTrigger value="paid" className="text-sm">
+                Paid ({statusCounts.paid})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-
-        {/* Status Tabs */}
+        {/* Content */}
         <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
-            <TabsTrigger value="all" className="text-xs sm:text-sm">
-              All ({statusCounts.all})
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="text-xs sm:text-sm">
-              Pending ({statusCounts.pending})
-            </TabsTrigger>
-            <TabsTrigger value="preparing" className="text-xs sm:text-sm">
-              Preparing ({statusCounts.preparing})
-            </TabsTrigger>
-            <TabsTrigger value="ready" className="text-xs sm:text-sm">
-              Ready ({statusCounts.ready})
-            </TabsTrigger>
-            <TabsTrigger value="served" className="text-xs sm:text-sm">
-              Served ({statusCounts.served})
-            </TabsTrigger>
-            <TabsTrigger value="completed" className="text-xs sm:text-sm">
-              Completed ({statusCounts.completed})
-            </TabsTrigger>
-            <TabsTrigger value="paid" className="text-xs sm:text-sm">
-              Paid ({statusCounts.paid})
-            </TabsTrigger>
-          </TabsList>
-
           <TabsContent value={selectedStatus} className="mt-6">
             {/* Pagination Info */}
             {sortedOrders.length > 0 && (
@@ -1358,7 +1395,6 @@ export default function Orders() {
             )}
           </TabsContent>
         </Tabs>
-
         {/* Payment Dialog */}
         <PaymentDialog
           order={selectedOrderForPayment}
