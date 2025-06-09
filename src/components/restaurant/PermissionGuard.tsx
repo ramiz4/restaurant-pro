@@ -10,7 +10,7 @@ interface PermissionGuardProps {
 }
 
 export const PermissionGuard = forwardRef<HTMLElement, PermissionGuardProps>(
-  ({ children, page, action, fallback = null }, ref) => {
+  ({ children, page, action, fallback = null }, _ref) => {
     const { hasPageAccess, hasActionAccess } = usePermissions();
 
     // Check page access first
