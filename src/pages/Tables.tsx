@@ -24,6 +24,174 @@ import { Table } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
 
+// Separate component for each table card to avoid hooks in map
+interface TableCardProps {
+  table: Table;
+  onStatusChange: (tableId: string, status: Table["status"]) => Promise<void>;
+  onReservation: (table: Table) => void;
+  onSelect: (table: Table) => void;
+}
+
+function TableCard({
+  table,
+  onStatusChange,
+  onReservation,
+  onSelect,
+}: TableCardProps) {
+  const isMobile = useIsMobile();
+
+  // Touch gestures for mobile
+  const tableGestures = useTouchGestures({
+    onSwipeLeft: () => {
+      if (table.status === "available") {
+        onStatusChange(table.id, "occupied");
+      } else if (table.status === "occupied") {
+        onStatusChange(table.id, "cleaning");
+      }
+    },
+    onSwipeRight: () => {
+      if (table.status === "occupied") {
+        onStatusChange(table.id, "available");
+      } else if (table.status === "cleaning") {
+        onStatusChange(table.id, "available");
+      }
+    },
+    onLongPress: () => {
+      if (table.status === "available") {
+        onReservation(table);
+      }
+    },
+    onDoubleTap: () => {
+      // Quick status toggle
+      const nextStatus: Table["status"] =
+        table.status === "available"
+          ? "occupied"
+          : table.status === "occupied"
+            ? "available"
+            : table.status === "reserved"
+              ? "occupied"
+              : "available";
+      onStatusChange(table.id, nextStatus);
+    },
+  });
+
+  const getStatusColor = (status: Table["status"]) => {
+    switch (status) {
+      case "available":
+        return "border-emerald-500/30 bg-emerald-50/50 hover:bg-emerald-100/70";
+      case "occupied":
+        return "border-red-500/30 bg-red-50/50 hover:bg-red-100/70";
+      case "reserved":
+        return "border-blue-500/30 bg-blue-50/50 hover:bg-blue-100/70";
+      case "cleaning":
+        return "border-yellow-500/30 bg-yellow-50/50 hover:bg-yellow-100/70";
+      default:
+        return "border-gray-300";
+    }
+  };
+
+  const getStatusIcon = (status: Table["status"]) => {
+    switch (status) {
+      case "available":
+        return <CheckCircle className="w-4 h-4 text-emerald-600" />;
+      case "occupied":
+        return <Users className="w-4 h-4 text-red-600" />;
+      case "reserved":
+        return <Calendar className="w-4 h-4 text-blue-600" />;
+      case "cleaning":
+        return <Sparkles className="w-4 h-4 text-yellow-600" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusBadgeVariant = (status: Table["status"]) => {
+    switch (status) {
+      case "available":
+        return "default" as const;
+      case "occupied":
+        return "destructive" as const;
+      case "reserved":
+        return "secondary" as const;
+      case "cleaning":
+        return "outline" as const;
+      default:
+        return "default" as const;
+    }
+  };
+
+  return (
+    <Card
+      key={table.id}
+      className={cn(
+        "transition-all duration-200 cursor-pointer border-2",
+        getStatusColor(table.status),
+        isMobile && "active:scale-95 touch-manipulation",
+      )}
+      {...(isMobile ? tableGestures : {})}
+    >
+      <CardHeader className="pb-2 sm:pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base sm:text-lg font-semibold leading-tight">
+            Table {table.number}
+          </CardTitle>
+          <div className="flex items-center gap-1 sm:gap-2">
+            {getStatusIcon(table.status)}
+            <Badge
+              variant={getStatusBadgeVariant(table.status)}
+              className="text-xs capitalize"
+            >
+              {table.status}
+            </Badge>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Capacity:</span>
+            <span className="font-medium">{table.capacity} people</span>
+          </div>
+          {table.currentOrder && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Order ID:</span>
+                <span className="font-medium">{table.currentOrder}</span>
+              </div>
+            </div>
+          )}
+          {table.reservedFor && (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Reserved:</span>
+                <span className="font-medium">{table.reservedFor}</span>
+              </div>
+              {table.reservedAt && (
+                <div className="text-xs text-muted-foreground">
+                  {table.reservedAt.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+          <div className="pt-2 sm:pt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => onSelect(table)}
+            >
+              View Details
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Tables() {
   const [tables, setTables] = useState<Table[]>([]);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
@@ -86,51 +254,6 @@ export default function Tables() {
       );
     } catch (error) {
       console.error("Failed to update table status:", error);
-    }
-  };
-
-  const getStatusIcon = (status: Table["status"]) => {
-    switch (status) {
-      case "available":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "occupied":
-        return <Users className="h-4 w-4 text-blue-600" />;
-      case "reserved":
-        return <Calendar className="h-4 w-4 text-yellow-600" />;
-      case "cleaning":
-        return <Sparkles className="h-4 w-4 text-purple-600" />;
-      default:
-        return null;
-    }
-  };
-
-  const getStatusBadgeVariant = (status: Table["status"]) => {
-    switch (status) {
-      case "available":
-        return "secondary" as const;
-      case "occupied":
-        return "default" as const;
-      case "reserved":
-        return "outline" as const;
-      case "cleaning":
-        return "secondary" as const;
-      default:
-        return "outline" as const;
-    }
-  };
-
-  const getStatusColor = (status: Table["status"]) => {
-    switch (status) {
-      case "available":
-        return "border-green-200 bg-green-50 hover:bg-green-100";
-      case "occupied":
-        return "border-blue-200 bg-blue-50 hover:bg-blue-100";
-      case "reserved":
-        return "border-yellow-200 bg-yellow-50 hover:bg-yellow-100";
-      case "cleaning":
-        return "border-purple-200 bg-purple-50 hover:bg-purple-100";
-      default:
-        return "border-gray-200 bg-gray-50 hover:bg-gray-100";
     }
   };
 
@@ -360,196 +483,15 @@ export default function Tables() {
               </div>
             )}
 
-            {filteredTables.map((table) => {
-              // Touch gestures for mobile
-              const tableGestures = useTouchGestures({
-                onSwipeLeft: () => {
-                  if (table.status === "available") {
-                    handleStatusChange(table.id, "occupied");
-                  } else if (table.status === "occupied") {
-                    handleStatusChange(table.id, "cleaning");
-                  }
-                },
-                onSwipeRight: () => {
-                  if (table.status === "occupied") {
-                    handleStatusChange(table.id, "available");
-                  } else if (table.status === "cleaning") {
-                    handleStatusChange(table.id, "available");
-                  }
-                },
-                onLongPress: () => {
-                  if (table.status === "available") {
-                    handleReservation(table);
-                  }
-                },
-                onDoubleTap: () => {
-                  // Quick status toggle
-                  const nextStatus: Table["status"] =
-                    table.status === "available"
-                      ? "occupied"
-                      : table.status === "occupied"
-                        ? "available"
-                        : table.status === "reserved"
-                          ? "occupied"
-                          : "available";
-                  handleStatusChange(table.id, nextStatus);
-                },
-              });
-
-              return (
-                <Card
-                  key={table.id}
-                  className={cn(
-                    "transition-all duration-200 cursor-pointer border-2",
-                    getStatusColor(table.status),
-                    isMobile && "active:scale-95 touch-manipulation",
-                  )}
-                  {...(isMobile ? tableGestures : {})}
-                >
-                  <CardHeader className="pb-2 sm:pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base sm:text-lg font-semibold leading-tight">
-                        Table {table.number}
-                      </CardTitle>
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        {getStatusIcon(table.status)}
-                        <Badge
-                          variant={getStatusBadgeVariant(table.status)}
-                          className="text-xs capitalize"
-                        >
-                          {table.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="flex flex-col h-full p-3 sm:p-6">
-                    <div className="flex-1 space-y-2 sm:space-y-3">
-                      <div className="text-xs sm:text-sm text-muted-foreground">
-                        Capacity: {table.capacity} people
-                      </div>
-                      {table.reservedFor && (
-                        <div className="text-xs sm:text-sm">
-                          <span className="font-medium">Reserved for:</span>{" "}
-                          {table.reservedFor}
-                        </div>
-                      )}
-                      {table.currentOrder && (
-                        <div className="text-xs sm:text-sm">
-                          <span className="font-medium">Order:</span>{" "}
-                          {table.currentOrder}
-                        </div>
-                      )}
-                      {table.reservedAt && (
-                        <div className="text-xs sm:text-sm">
-                          <span className="font-medium">Reserved:</span>{" "}
-                          {table.reservedAt.toLocaleDateString()}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col gap-1 sm:gap-2 mt-3 sm:mt-4">
-                      {table.status === "available" && (
-                        <div className="flex gap-1 sm:gap-2">
-                          <Button
-                            size="sm"
-                            className="flex-1 text-xs h-8 sm:h-9"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(table.id, "occupied");
-                            }}
-                          >
-                            Seat Guests
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 text-xs h-8 sm:h-9"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleReservation(table);
-                            }}
-                          >
-                            Reserve
-                          </Button>
-                        </div>
-                      )}
-
-                      {table.status === "occupied" && (
-                        <div className="flex gap-1 sm:gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 text-xs h-8 sm:h-9"
-                          >
-                            View Order
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="flex-1 text-xs h-8 sm:h-9"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(table.id, "cleaning");
-                            }}
-                          >
-                            Clear Table
-                          </Button>
-                        </div>
-                      )}
-
-                      {table.status === "reserved" && (
-                        <div className="flex gap-1 sm:gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-xs h-8 sm:h-9"
-                          >
-                            View Reservation
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="flex-1 text-xs h-8 sm:h-9"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(table.id, "available");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      )}
-
-                      {table.status === "cleaning" && (
-                        <div className="flex gap-1 sm:gap-2">
-                          <Button
-                            size="sm"
-                            className="flex-1 text-xs h-8 sm:h-9"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(table.id, "occupied");
-                            }}
-                          >
-                            Seat Guests
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 text-xs h-8 sm:h-9"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(table.id, "available");
-                            }}
-                          >
-                            Mark Clean
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {filteredTables.map((table) => (
+              <TableCard
+                key={table.id}
+                table={table}
+                onStatusChange={handleStatusChange}
+                onReservation={handleReservation}
+                onSelect={setSelectedTable}
+              />
+            ))}
           </div>
         </div>
 
