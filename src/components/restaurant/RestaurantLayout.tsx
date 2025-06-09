@@ -202,7 +202,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
           </div>
 
           {/* Mobile Main content */}
-          <main className="pt-16 p-4 sm:p-6">{children}</main>
+          <main className="pt-24 p-4 sm:p-6">{children}</main>
         </Sheet>
       ) : (
         /* Desktop Layout */
