@@ -136,7 +136,7 @@ export default function Reports() {
     <RestaurantLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">
               Sales Reports & Analytics
@@ -145,7 +145,7 @@ export default function Reports() {
               Track your restaurant's performance and identify trends
             </p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:space-x-4 sm:gap-0 w-full lg:w-auto">
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-full sm:w-[140px]">
                 <SelectValue />
