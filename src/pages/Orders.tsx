@@ -201,7 +201,6 @@ export default function Orders() {
         const activeServers = usersData.filter(
           (user) => user.role === "server" && user.active,
         );
-        console.log("Active servers loaded:", activeServers);
         setUsers(activeServers);
       } catch (error) {
         console.error("Failed to fetch data:", error);
