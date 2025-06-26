@@ -4,6 +4,7 @@ import {
   type Order,
   type Payment,
   type SalesReport,
+  type Shift,
   type Table,
   type User,
   mockInventory,
@@ -11,6 +12,7 @@ import {
   mockOrders,
   mockPayments,
   mockSalesData,
+  mockShifts,
   mockTables,
   mockUsers,
 } from "./mock-data";
@@ -309,6 +311,47 @@ export class RestaurantService {
   static async getPaymentByOrderId(orderId: string): Promise<Payment | null> {
     await delay(200);
     return mockPayments.find((payment) => payment.orderId === orderId) || null;
+  }
+
+  // Shifts
+  static async getShifts(): Promise<Shift[]> {
+    await delay(200);
+    return [...mockShifts].sort(
+      (a, b) => a.start.getTime() - b.start.getTime(),
+    );
+  }
+
+  static async createShift(shift: Omit<Shift, "id">): Promise<Shift> {
+    await delay(300);
+    const newShift: Shift = {
+      ...shift,
+      id: `SHIFT-${String(mockShifts.length + 1).padStart(3, "0")}`,
+    };
+    mockShifts.push(newShift);
+    return newShift;
+  }
+
+  static async updateShift(
+    id: string,
+    updates: Partial<Shift>,
+  ): Promise<Shift> {
+    await delay(300);
+    const idx = mockShifts.findIndex((s) => s.id === id);
+    if (idx !== -1) {
+      mockShifts[idx] = { ...mockShifts[idx], ...updates };
+      return mockShifts[idx];
+    }
+    throw new Error("Shift not found");
+  }
+
+  static async deleteShift(id: string): Promise<void> {
+    await delay(200);
+    const idx = mockShifts.findIndex((s) => s.id === id);
+    if (idx !== -1) {
+      mockShifts.splice(idx, 1);
+    } else {
+      throw new Error("Shift not found");
+    }
   }
 }
 

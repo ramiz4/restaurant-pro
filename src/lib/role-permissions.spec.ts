@@ -70,6 +70,7 @@ describe("getNavigationItems", () => {
       "inventory",
       "users",
       "reports",
+      "schedule",
       "audit-log",
     ]);
   });
@@ -81,6 +82,7 @@ describe("getNavigationItems", () => {
       "menu",
       "tables",
       "inventory",
+      "schedule",
     ]);
   });
 
@@ -90,6 +92,7 @@ describe("getNavigationItems", () => {
       "orders",
       "menu",
       "inventory",
+      "schedule",
     ]);
   });
 });

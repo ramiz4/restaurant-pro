@@ -82,6 +82,14 @@ export interface SalesReport {
   topItems: { item: string; quantity: number; revenue: number }[];
 }
 
+export interface Shift {
+  id: string;
+  userId: string;
+  role: User["role"];
+  start: Date;
+  end: Date;
+}
+
 // Mock Data
 export const mockMenuItems: MenuItem[] = [
   // Appetizers
@@ -1231,5 +1239,43 @@ export const mockSalesData: SalesReport[] = [
       { item: "Grilled Salmon", quantity: 10, revenue: 249.9 },
       { item: "Chocolate Cake", quantity: 18, revenue: 161.82 },
     ],
+  },
+];
+
+export const mockShifts: Shift[] = [
+  {
+    id: "SHIFT-001",
+    userId: "1",
+    role: "server",
+    start: new Date(Date.now() + 2 * 60 * 60 * 1000),
+    end: new Date(Date.now() + 10 * 60 * 60 * 1000),
+  },
+  {
+    id: "SHIFT-002",
+    userId: "2",
+    role: "server",
+    start: new Date(Date.now() + 12 * 60 * 60 * 1000),
+    end: new Date(Date.now() + 20 * 60 * 60 * 1000),
+  },
+  {
+    id: "SHIFT-003",
+    userId: "3",
+    role: "manager",
+    start: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    end: new Date(Date.now() + 32 * 60 * 60 * 1000),
+  },
+  {
+    id: "SHIFT-004",
+    userId: "4",
+    role: "kitchen",
+    start: new Date(Date.now() + 36 * 60 * 60 * 1000),
+    end: new Date(Date.now() + 44 * 60 * 60 * 1000),
+  },
+  {
+    id: "SHIFT-005",
+    userId: "5",
+    role: "admin",
+    start: new Date(Date.now() + 48 * 60 * 60 * 1000),
+    end: new Date(Date.now() + 56 * 60 * 60 * 1000),
   },
 ];
