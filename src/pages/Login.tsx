@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuditLog } from "@/contexts/AuditLogContext";
 import { getUserByEmail, useUser } from "@/contexts/UserContext";
 
 export default function Login() {
@@ -40,6 +41,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setCurrentUser, currentUser } = useUser();
+  const { recordAction } = useAuditLog();
 
   const from = location.state?.from?.pathname || "/dashboard";
 
@@ -58,6 +60,7 @@ export default function Login() {
     setTimeout(() => {
       const user = getUserByEmail(formData.email);
       setCurrentUser(user);
+      recordAction("Logged in", "auth");
       setLoading(false);
       navigate(from, { replace: true });
     }, 1200);
@@ -104,6 +107,7 @@ export default function Login() {
     setTimeout(() => {
       const user = getUserByEmail(email);
       setCurrentUser(user);
+      recordAction("Logged in", "auth");
       setLoading(false);
       navigate(from, { replace: true });
     }, 1000);

@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuditLog } from "@/contexts/AuditLogContext";
 import { useUser } from "@/contexts/UserContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -45,6 +46,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, logout } = useUser();
+  const { recordAction } = useAuditLog();
   const { getNavigationItems } = usePermissions();
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -63,6 +65,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
   }, []);
 
   const handleSignOut = () => {
+    recordAction("Logged out", "auth");
     logout();
     navigate("/login");
   };

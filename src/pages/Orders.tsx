@@ -341,7 +341,7 @@ export default function Orders() {
 
       const createdOrder = await RestaurantService.createOrder(orderData);
       setOrders((prev) => [createdOrder, ...prev]);
-      recordAction(`Created order ${createdOrder.id}`);
+      recordAction(`Created order ${createdOrder.id}`, "orders");
 
       // Reset form
       setNewOrder({ tableNumber: "", serverName: "", notes: "" });
