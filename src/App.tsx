@@ -23,6 +23,7 @@ const Reports = lazy(() => import("./pages/Reports"));
 const AuditLog = lazy(() => import("./pages/AuditLog"));
 const Login = lazy(() => import("./pages/Login"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const OnlineOrdering = lazy(() => import("./pages/OnlineOrdering"));
 
 // Loading component for Suspense fallback
 const PageLoading = () => (
@@ -50,6 +51,7 @@ const App = () => (
             <Suspense fallback={<PageLoading />}>
               <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/order-online" element={<OnlineOrdering />} />
                 <Route
                   path="/"
                   element={

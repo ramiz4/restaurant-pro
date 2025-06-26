@@ -46,6 +46,7 @@ A modern, full-featured restaurant management application built with React, Type
 - **Role-restricted payment processing**: Only authorized roles can process payments
 - Order history and search
 - **Kitchen staff workflow**: Specialized interface for order status updates
+- **Online ordering interface**: Customers can place orders online and staff receive them in the orders view
 
 ### 🍕 Menu Management
 
@@ -396,7 +397,6 @@ The application is fully responsive and optimized for:
 - **Advanced Reporting Features**: Role-based report customization
 - **Integration with POS Systems**: Enterprise-grade point of sale integration
 - **Customer Feedback System**: Role-based customer interaction management
-- **Online Ordering Integration**: Customer-facing ordering with staff notifications
 - **Staff Scheduling Module**: Role-based schedule management
 - **Supplier Management**: Vendor relationships with permission controls
 
