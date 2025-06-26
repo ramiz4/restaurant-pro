@@ -20,6 +20,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      contents: read
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
