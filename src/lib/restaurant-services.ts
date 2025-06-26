@@ -2,6 +2,7 @@ import {
   type InventoryItem,
   type MenuItem,
   type Order,
+  type OrderItem,
   type Payment,
   type SalesReport,
   type Table,
@@ -19,6 +20,12 @@ import {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class RestaurantService {
+  private static calculateTotal(items: OrderItem[]): number {
+    return items.reduce(
+      (sum, item) => sum + item.menuItem.price * item.quantity,
+      0,
+    );
+  }
   // Orders
   static async getOrders(): Promise<Order[]> {
     await delay(300);
@@ -67,6 +74,53 @@ export class RestaurantService {
       return mockOrders[orderIndex];
     }
     throw new Error("Order not found");
+  }
+
+  static async splitOrder(orderId: string, itemIds: string[]): Promise<Order> {
+    await delay(300);
+    const orderIndex = mockOrders.findIndex((o) => o.id === orderId);
+    if (orderIndex === -1) {
+      throw new Error("Order not found");
+    }
+
+    const order = mockOrders[orderIndex];
+    const itemsToMove = order.items.filter((item) => itemIds.includes(item.id));
+    if (itemsToMove.length === 0) {
+      throw new Error("No matching items to split");
+    }
+
+    order.items = order.items.filter((item) => !itemIds.includes(item.id));
+    order.total = this.calculateTotal(order.items);
+
+    const newOrder: Order = {
+      ...order,
+      id: `ORD-${String(mockOrders.length + 1).padStart(3, "0")}`,
+      items: itemsToMove,
+      total: this.calculateTotal(itemsToMove),
+      createdAt: new Date(),
+    };
+
+    mockOrders.push(newOrder);
+    return newOrder;
+  }
+
+  static async mergeOrders(
+    targetOrderId: string,
+    sourceOrderId: string,
+  ): Promise<Order> {
+    await delay(300);
+    const targetOrder = mockOrders.find((o) => o.id === targetOrderId);
+    const sourceIndex = mockOrders.findIndex((o) => o.id === sourceOrderId);
+    if (!targetOrder || sourceIndex === -1) {
+      throw new Error("Order not found");
+    }
+
+    const sourceOrder = mockOrders[sourceIndex];
+    targetOrder.items = [...targetOrder.items, ...sourceOrder.items];
+    targetOrder.total = this.calculateTotal(targetOrder.items);
+
+    mockOrders.splice(sourceIndex, 1);
+    return targetOrder;
   }
 
   // Menu
