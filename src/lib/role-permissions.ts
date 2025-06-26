@@ -26,6 +26,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     },
     { page: "users", actions: ["create", "view", "edit", "delete"] },
     { page: "reports", actions: ["view", "export"] },
+    { page: "audit-log", actions: ["view"] },
   ],
   Manager: [
     { page: "dashboard" },
@@ -79,6 +80,12 @@ export const NAVIGATION_ITEMS = [
     href: "/reports",
     icon: "BarChart3",
     requiredPage: "reports",
+  },
+  {
+    name: "Audit Log",
+    href: "/audit-log",
+    icon: "ListChecks",
+    requiredPage: "audit-log",
   },
 ];
 

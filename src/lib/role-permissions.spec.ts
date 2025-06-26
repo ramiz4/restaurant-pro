@@ -19,6 +19,7 @@ describe("hasPageAccess", () => {
       "inventory",
       "users",
       "reports",
+      "audit-log",
     ];
     pages.forEach((page) => {
       expect(hasPageAccess("Administrator", page)).toBe(true);
@@ -67,6 +68,7 @@ describe("getNavigationItems", () => {
       "inventory",
       "users",
       "reports",
+      "audit-log",
     ]);
   });
 
