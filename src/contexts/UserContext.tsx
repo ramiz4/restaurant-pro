@@ -6,10 +6,12 @@ import {
   useState,
 } from "react";
 
+import { UserRole } from "../lib/role-permissions";
+
 interface User {
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
   initials: string;
   roleColor: string;
 }
@@ -111,7 +113,7 @@ export function getUserByEmail(email: string): User {
     defaultUsers[email as keyof typeof defaultUsers] || {
       name: "Unknown User",
       email: email,
-      role: "User",
+      role: "Server",
       initials: "UU",
       roleColor: "text-gray-500",
     }
