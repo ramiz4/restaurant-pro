@@ -69,6 +69,62 @@ export class RestaurantService {
     throw new Error("Order not found");
   }
 
+  static async splitOrder(orderId: string, itemIds: string[]): Promise<Order> {
+    await delay(300);
+    const orderIndex = mockOrders.findIndex((o) => o.id === orderId);
+    if (orderIndex === -1) {
+      throw new Error("Order not found");
+    }
+
+    const order = mockOrders[orderIndex];
+    const itemsToMove = order.items.filter((item) => itemIds.includes(item.id));
+    if (itemsToMove.length === 0) {
+      throw new Error("No matching items to split");
+    }
+
+    order.items = order.items.filter((item) => !itemIds.includes(item.id));
+    order.total = order.items.reduce(
+      (sum, item) => sum + item.menuItem.price * item.quantity,
+      0,
+    );
+
+    const newOrder: Order = {
+      ...order,
+      id: `ORD-${String(mockOrders.length + 1).padStart(3, "0")}`,
+      items: itemsToMove,
+      total: itemsToMove.reduce(
+        (sum, item) => sum + item.menuItem.price * item.quantity,
+        0,
+      ),
+      createdAt: new Date(),
+    };
+
+    mockOrders.push(newOrder);
+    return newOrder;
+  }
+
+  static async mergeOrders(
+    targetOrderId: string,
+    sourceOrderId: string,
+  ): Promise<Order> {
+    await delay(300);
+    const targetOrder = mockOrders.find((o) => o.id === targetOrderId);
+    const sourceIndex = mockOrders.findIndex((o) => o.id === sourceOrderId);
+    if (!targetOrder || sourceIndex === -1) {
+      throw new Error("Order not found");
+    }
+
+    const sourceOrder = mockOrders[sourceIndex];
+    targetOrder.items = [...targetOrder.items, ...sourceOrder.items];
+    targetOrder.total = targetOrder.items.reduce(
+      (sum, item) => sum + item.menuItem.price * item.quantity,
+      0,
+    );
+
+    mockOrders.splice(sourceIndex, 1);
+    return targetOrder;
+  }
+
   // Menu
   static async getMenuItems(): Promise<MenuItem[]> {
     await delay(200);
