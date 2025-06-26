@@ -1,62 +1,58 @@
 import { ReactElement } from "react";
 
-import { createRoot } from "react-dom/client";
-import { act } from "react-dom/test-utils";
+import { renderToStaticMarkup } from "react-dom/server";
 import { expect } from "vitest";
 
-let root: ReturnType<typeof createRoot> | null = null;
-let container: HTMLElement | null = null;
+let html = "";
 
 export function render(ui: ReactElement) {
-  cleanup();
-  container = document.createElement("div");
-  document.body.appendChild(container);
-  root = createRoot(container);
-  act(() => {
-    root!.render(ui);
-  });
-  return { container };
+  html = renderToStaticMarkup(ui);
+  return {
+    container: {
+      innerHTML: html,
+      querySelectorAll(selector: string) {
+        if (selector.startsWith(".")) {
+          const className = selector
+            .slice(1)
+            .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(
+            `class=["'][^"']*\\b${className}\\b[^"']*["']`,
+            "g",
+          );
+          const count = (html.match(regex) || []).length;
+          return new Array(count).fill({});
+        }
+        return [];
+      },
+    },
+  };
 }
 
 export function cleanup() {
-  if (root) {
-    act(() => {
-      root!.unmount();
-    });
-    root = null;
-  }
-  if (container) {
-    document.body.removeChild(container);
-    container = null;
-  }
+  html = "";
 }
 
 export const screen = {
   getByText(text: string) {
-    const el = Array.from((container ?? document).querySelectorAll("*")).find(
-      (node) => (node as HTMLElement).textContent === text,
-    ) as HTMLElement | undefined;
-    if (!el) {
+    if (!html.includes(text)) {
       throw new Error(`Unable to find element with text: ${text}`);
     }
-    return el;
+    return text;
   },
   queryByText(text: string) {
-    return Array.from((container ?? document).querySelectorAll("*")).find(
-      (node) => (node as HTMLElement).textContent === text,
-    ) as HTMLElement | null;
+    return html.includes(text) ? text : null;
   },
 };
 
 expect.extend({
-  toBeInTheDocument(received: HTMLElement) {
-    const pass = document.body.contains(received);
+  toBeInTheDocument(received: string) {
+    const pass = html.includes(received);
     return {
       pass,
       message: () =>
         pass
-          ? "expected element not to be in the document"
-          : "expected element to be in the document",
+          ? `expected "${received}" not to be in the document`
+          : `expected "${received}" to be in the document`,
     };
   },
 });

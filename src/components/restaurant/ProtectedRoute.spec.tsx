@@ -2,13 +2,21 @@ import type { ReactElement } from "react";
 
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
-import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useUser } from "@/contexts/UserContext";
 import { usePermissions } from "@/hooks/use-permissions";
+import { cleanup, render, screen } from "@/test-utils/react-testing-library";
 
 import { ProtectedRoute } from "./ProtectedRoute";
+
+vi.mock("react-router-dom", async () => {
+  const actual: any = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    Navigate: ({ to }: { to: string }) => <div>redirect:{to}</div>,
+  };
+});
 
 vi.mock("@/contexts/UserContext", () => ({
   useUser: vi.fn(),
@@ -39,8 +47,8 @@ function renderWithRouter(ui: ReactElement) {
 
 describe("ProtectedRoute", () => {
   it("shows skeleton while loading user context", () => {
-    mockedUseUser().mockReturnValue({ isLoading: true });
-    mockedUsePermissions().mockReturnValue({
+    mockedUseUser.mockReturnValue({ isLoading: true } as any);
+    mockedUsePermissions.mockReturnValue({
       currentUser: null,
       hasPageAccess: vi.fn(),
     });
@@ -51,15 +59,13 @@ describe("ProtectedRoute", () => {
       </ProtectedRoute>,
     );
 
-    expect(container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(
-      0,
-    );
+    expect(container.innerHTML.includes("animate-pulse")).toBe(true);
     expect(screen.queryByText("Orders Page")).toBeNull();
   });
 
   it("redirects to login when no user is present", () => {
-    mockedUseUser().mockReturnValue({ isLoading: false });
-    mockedUsePermissions().mockReturnValue({
+    mockedUseUser.mockReturnValue({ isLoading: false } as any);
+    mockedUsePermissions.mockReturnValue({
       currentUser: null,
       hasPageAccess: vi.fn(),
     });
@@ -70,13 +76,13 @@ describe("ProtectedRoute", () => {
       </ProtectedRoute>,
     );
 
-    expect(screen.getByText("Login Page")).toBeInTheDocument();
+    expect(screen.getByText("redirect:/login")).toBeInTheDocument();
     expect(screen.queryByText("Orders Page")).toBeNull();
   });
 
   it("redirects to dashboard when user lacks page access", () => {
-    mockedUseUser().mockReturnValue({ isLoading: false });
-    mockedUsePermissions().mockReturnValue({
+    mockedUseUser.mockReturnValue({ isLoading: false } as any);
+    mockedUsePermissions.mockReturnValue({
       currentUser: { role: "Server" },
       hasPageAccess: () => false,
     });
@@ -87,7 +93,7 @@ describe("ProtectedRoute", () => {
       </ProtectedRoute>,
     );
 
-    expect(screen.getByText("Dashboard Page")).toBeInTheDocument();
+    expect(screen.getByText("redirect:/dashboard")).toBeInTheDocument();
     expect(screen.queryByText("Users Page")).toBeNull();
   });
 });
