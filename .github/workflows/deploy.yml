@@ -21,12 +21,15 @@ jobs:
       pages: write
       id-token: write
       contents: read
+      actions: read
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: dist
           run-id: ${{ github.event.workflow_run.id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ./dist
 
       - name: Setup Pages
