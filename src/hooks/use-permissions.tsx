@@ -1,6 +1,5 @@
 import { useUser } from "@/contexts/UserContext";
 import {
-  UserRole,
   getNavigationItems,
   hasActionAccess,
   hasPageAccess,
@@ -9,7 +8,7 @@ import {
 export function usePermissions() {
   const { currentUser } = useUser();
 
-  const userRole = currentUser?.role as UserRole;
+  const userRole = currentUser?.role;
 
   return {
     hasPageAccess: (page: string) => {
