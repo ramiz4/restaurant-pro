@@ -177,7 +177,9 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+    // We only want to register the listener once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     ...state,
