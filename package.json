@@ -14,7 +14,8 @@
     "format": "prettier --check .",
     "format:fix": "npm run lint:fix && prettier --write .",
     "typecheck": "tsc",
-    "prepare": "husky"
+    "prepare": "husky",
+    "notify-server": "node server/notification-server.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

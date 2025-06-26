@@ -39,6 +39,20 @@ export class RestaurantService {
       createdAt: new Date(),
     };
     mockOrders.push(newOrder);
+
+    // Notify kitchen staff about new order
+    fetch("http://localhost:4001/notify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "New Order",
+        message: `Order ${newOrder.id} created`,
+        role: "Kitchen Staff",
+      }),
+    }).catch(() => {
+      /* ignore network errors in mock environment */
+    });
+
     return newOrder;
   }
 
@@ -132,6 +146,24 @@ export class RestaurantService {
     if (itemIndex !== -1) {
       mockInventory[itemIndex].currentStock = newStock;
       mockInventory[itemIndex].lastRestocked = new Date();
+
+      if (
+        mockInventory[itemIndex].currentStock <=
+        mockInventory[itemIndex].minStock
+      ) {
+        fetch("http://localhost:4001/notify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "Low Stock",
+            message: `${mockInventory[itemIndex].name} is low on stock`,
+            role: "Manager",
+          }),
+        }).catch(() => {
+          /* ignore network errors in mock environment */
+        });
+      }
+
       return mockInventory[itemIndex];
     }
     throw new Error("Inventory item not found");
