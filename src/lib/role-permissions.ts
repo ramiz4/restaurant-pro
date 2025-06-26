@@ -1,6 +1,17 @@
 // Role-based access control definitions
 
-export type UserRole = "Administrator" | "Manager" | "Server" | "Kitchen Staff";
+export type DefaultUserRole =
+  | "Administrator"
+  | "Manager"
+  | "Server"
+  | "Kitchen Staff";
+
+export type UserRole = DefaultUserRole | (string & {});
+
+export interface RoleDefinition {
+  permissions: Permission[];
+  inherits?: UserRole[];
+}
 
 export interface Permission {
   page: string;
@@ -8,49 +19,118 @@ export interface Permission {
 }
 
 // Define what each role can access
-export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
-  Administrator: [
-    { page: "dashboard" },
-    {
-      page: "orders",
-      actions: ["create", "view", "edit", "delete", "payment"],
+export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
+  {
+    Administrator: {
+      permissions: [
+        { page: "dashboard" },
+        {
+          page: "orders",
+          actions: ["create", "view", "edit", "delete", "payment"],
+        },
+        { page: "menu", actions: ["create", "view", "edit", "delete"] },
+        {
+          page: "tables",
+          actions: ["create", "view", "edit", "delete", "reserve"],
+        },
+        {
+          page: "inventory",
+          actions: ["create", "view", "edit", "delete", "restock"],
+        },
+        { page: "users", actions: ["create", "view", "edit", "delete"] },
+        { page: "reports", actions: ["view", "export"] },
+        { page: "audit-log", actions: ["view"] },
+      ],
     },
-    { page: "menu", actions: ["create", "view", "edit", "delete"] },
-    {
-      page: "tables",
-      actions: ["create", "view", "edit", "delete", "reserve"],
+    Manager: {
+      permissions: [
+        { page: "dashboard" },
+        { page: "orders", actions: ["create", "view", "edit", "payment"] },
+        { page: "menu", actions: ["create", "view", "edit", "delete"] },
+        { page: "tables", actions: ["view", "edit", "reserve"] },
+        { page: "inventory", actions: ["view", "edit", "restock"] },
+        { page: "users", actions: ["view"] },
+        { page: "reports", actions: ["view", "export"] },
+      ],
     },
-    {
-      page: "inventory",
-      actions: ["create", "view", "edit", "delete", "restock"],
+    Server: {
+      permissions: [
+        { page: "dashboard" },
+        { page: "orders", actions: ["create", "view", "edit"] },
+        { page: "menu", actions: ["view"] },
+        { page: "tables", actions: ["view", "edit", "reserve"] },
+        { page: "inventory", actions: ["view"] },
+      ],
     },
-    { page: "users", actions: ["create", "view", "edit", "delete"] },
-    { page: "reports", actions: ["view", "export"] },
-    { page: "audit-log", actions: ["view"] },
-  ],
-  Manager: [
-    { page: "dashboard" },
-    { page: "orders", actions: ["create", "view", "edit", "payment"] },
-    { page: "menu", actions: ["create", "view", "edit", "delete"] },
-    { page: "tables", actions: ["view", "edit", "reserve"] },
-    { page: "inventory", actions: ["view", "edit", "restock"] },
-    { page: "users", actions: ["view"] },
-    { page: "reports", actions: ["view", "export"] },
-  ],
-  Server: [
-    { page: "dashboard" },
-    { page: "orders", actions: ["create", "view", "edit"] },
-    { page: "menu", actions: ["view"] },
-    { page: "tables", actions: ["view", "edit", "reserve"] },
-    { page: "inventory", actions: ["view"] },
-  ],
-  "Kitchen Staff": [
-    { page: "dashboard" },
-    { page: "orders", actions: ["view", "edit"] }, // Can update order status
-    { page: "menu", actions: ["view"] },
-    { page: "inventory", actions: ["view"] },
-  ],
-};
+    "Kitchen Staff": {
+      permissions: [
+        { page: "dashboard" },
+        { page: "orders", actions: ["view", "edit"] }, // Can update order status
+        { page: "menu", actions: ["view"] },
+        { page: "inventory", actions: ["view"] },
+      ],
+    },
+  };
+
+const customRoleDefinitions: Record<string, RoleDefinition> = {};
+
+export function defineRole(role: string, definition: RoleDefinition) {
+  customRoleDefinitions[role] = definition;
+}
+
+export function resetCustomRoles() {
+  for (const key of Object.keys(customRoleDefinitions)) {
+    delete customRoleDefinitions[key];
+  }
+}
+
+function getRoleDefinition(role: UserRole): RoleDefinition | undefined {
+  return (
+    customRoleDefinitions[role] ||
+    DEFAULT_ROLE_DEFINITIONS[role as DefaultUserRole]
+  );
+}
+
+function mergePermissions(perms: Permission[]): Permission[] {
+  const pageMap = new Map<string, Set<string> | undefined>();
+  for (const perm of perms) {
+    const existing = pageMap.get(perm.page);
+    if (!existing) {
+      pageMap.set(perm.page, perm.actions ? new Set(perm.actions) : undefined);
+    } else if (existing) {
+      if (!perm.actions || !existing) {
+        pageMap.set(perm.page, undefined);
+      } else {
+        perm.actions.forEach((a) => existing.add(a));
+      }
+    }
+  }
+  return Array.from(pageMap.entries()).map(([page, actions]) => ({
+    page,
+    actions: actions ? Array.from(actions) : undefined,
+  }));
+}
+
+function resolvePermissions(
+  role: UserRole,
+  visited: Set<UserRole>,
+): Permission[] {
+  if (visited.has(role)) return [];
+  visited.add(role);
+  const def = getRoleDefinition(role);
+  if (!def) return [];
+  let perms = [...def.permissions];
+  if (def.inherits) {
+    for (const parent of def.inherits) {
+      perms = perms.concat(resolvePermissions(parent, visited));
+    }
+  }
+  return mergePermissions(perms);
+}
+
+function getRolePermissions(role: UserRole): Permission[] {
+  return resolvePermissions(role, new Set());
+}
 
 // Navigation items with required permissions
 export const NAVIGATION_ITEMS = [
@@ -91,7 +171,7 @@ export const NAVIGATION_ITEMS = [
 
 // Helper functions
 export function hasPageAccess(userRole: UserRole, page: string): boolean {
-  const permissions = ROLE_PERMISSIONS[userRole];
+  const permissions = getRolePermissions(userRole);
   return permissions.some((permission) => permission.page === page);
 }
 
@@ -100,7 +180,7 @@ export function hasActionAccess(
   page: string,
   action: string,
 ): boolean {
-  const permissions = ROLE_PERMISSIONS[userRole];
+  const permissions = getRolePermissions(userRole);
   const pagePermission = permissions.find(
     (permission) => permission.page === page,
   );
@@ -112,7 +192,7 @@ export function hasActionAccess(
 }
 
 export function getAccessiblePages(userRole: UserRole): string[] {
-  const permissions = ROLE_PERMISSIONS[userRole];
+  const permissions = getRolePermissions(userRole);
   return permissions.map((permission) => permission.page);
 }
 

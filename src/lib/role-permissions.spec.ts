@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import {
   UserRole,
+  defineRole,
   getNavigationItems,
   hasActionAccess,
   hasPageAccess,
+  resetCustomRoles,
 } from "./role-permissions";
 
 // Test suites for role-based permissions
@@ -89,5 +91,27 @@ describe("getNavigationItems", () => {
       "menu",
       "inventory",
     ]);
+  });
+});
+
+describe("custom roles", () => {
+  afterEach(() => {
+    resetCustomRoles();
+  });
+
+  it("allows creating a role with no inheritance", () => {
+    defineRole("Guest", { permissions: [{ page: "dashboard" }] });
+    expect(hasPageAccess("Guest", "dashboard")).toBe(true);
+    expect(hasPageAccess("Guest", "orders")).toBe(false);
+  });
+
+  it("supports permission inheritance", () => {
+    defineRole("Supervisor", {
+      inherits: ["Server"],
+      permissions: [{ page: "reports", actions: ["view"] }],
+    });
+    expect(hasPageAccess("Supervisor", "orders")).toBe(true); // from Server
+    expect(hasActionAccess("Supervisor", "reports", "view")).toBe(true);
+    expect(hasActionAccess("Supervisor", "reports", "export")).toBe(false);
   });
 });
