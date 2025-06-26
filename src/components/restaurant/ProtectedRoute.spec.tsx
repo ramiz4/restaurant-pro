@@ -33,6 +33,7 @@ const mockedUseUser = vi.mocked(useUser);
 const mockedUsePermissions = vi.mocked(usePermissions);
 
 afterEach(() => {
+  vi.resetAllMocks();
   cleanup();
 });
 
