@@ -12,5 +12,9 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    coverage: {
+      provider: "c8",
+      reporter: ["text", "lcov"],
+    },
   },
 });
