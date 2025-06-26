@@ -23,6 +23,7 @@ const Inventory = lazy(() => import("./pages/Inventory"));
 const Users = lazy(() => import("./pages/Users"));
 const Reports = lazy(() => import("./pages/Reports"));
 const AuditLog = lazy(() => import("./pages/AuditLog"));
+const OnlineOrder = lazy(() => import("./pages/OnlineOrder"));
 const Login = lazy(() => import("./pages/Login"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -126,6 +127,7 @@ const App = () => (
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="/order" element={<OnlineOrder />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
