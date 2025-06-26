@@ -12,11 +12,12 @@ export interface AuditLogEntry {
   action: string;
   user: string;
   timestamp: string;
+  category: string;
 }
 
 interface AuditLogContextType {
   logs: AuditLogEntry[];
-  recordAction: (action: string) => void;
+  recordAction: (action: string, category?: string) => void;
 }
 
 const AuditLogContext = createContext<AuditLogContextType | undefined>(
@@ -29,7 +30,8 @@ export function AuditLogProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem("auditLogs");
     if (stored) {
       try {
-        return JSON.parse(stored);
+        const parsed: AuditLogEntry[] = JSON.parse(stored);
+        return parsed.map((entry) => ({ category: "general", ...entry }));
       } catch {
         return [];
       }
@@ -41,12 +43,13 @@ export function AuditLogProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("auditLogs", JSON.stringify(logs));
   }, [logs]);
 
-  const recordAction = (action: string) => {
+  const recordAction = (action: string, category = "general") => {
     if (!currentUser) return;
     const entry: AuditLogEntry = {
       action,
       user: currentUser.name,
       timestamp: new Date().toISOString(),
+      category,
     };
     setLogs((prev) => [...prev, entry]);
   };

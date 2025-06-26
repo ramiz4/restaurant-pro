@@ -172,12 +172,12 @@ export default function Inventory() {
         setInventory((prev) =>
           prev.map((item) => (item.id === editingItem.id ? updatedItem : item)),
         );
-        recordAction(`Updated inventory item ${updatedItem.name}`);
+        recordAction(`Updated inventory item ${updatedItem.name}`, "inventory");
       } else {
         // Add new item
         const newItem = await RestaurantService.addInventoryItem(itemData);
         setInventory((prev) => [...prev, newItem]);
-        recordAction(`Added inventory item ${newItem.name}`);
+        recordAction(`Added inventory item ${newItem.name}`, "inventory");
       }
 
       resetForm();
@@ -202,7 +202,7 @@ export default function Inventory() {
       setInventory((prev) =>
         prev.map((item) => (item.id === selectedItem.id ? updatedItem : item)),
       );
-      recordAction(`Restocked item ${updatedItem.name}`);
+      recordAction(`Restocked item ${updatedItem.name}`, "inventory");
 
       // Reset form
       setRestockData({ quantity: "", cost: "" });
@@ -238,7 +238,7 @@ export default function Inventory() {
     try {
       // Simulate delete by removing from local state
       setInventory((prev) => prev.filter((item) => item.id !== itemId));
-      recordAction(`Deleted inventory item ${itemId}`);
+      recordAction(`Deleted inventory item ${itemId}`, "inventory");
     } catch (error) {
       console.error("Failed to delete inventory item:", error);
     }

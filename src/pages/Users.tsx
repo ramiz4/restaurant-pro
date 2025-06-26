@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useAuditLog } from "@/contexts/AuditLogContext";
 import { User } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,7 @@ export default function Users() {
   const [selectedRole, setSelectedRole] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const { recordAction } = useAuditLog();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -123,10 +125,19 @@ export default function Users() {
         setUsers((prev) =>
           prev.map((user) => (user.id === editingUser.id ? updatedUser : user)),
         );
+        if (editingUser.role !== updatedUser.role) {
+          recordAction(
+            `Changed role for ${updatedUser.name} from ${editingUser.role} to ${updatedUser.role}`,
+            "permission",
+          );
+        } else {
+          recordAction(`Updated user ${updatedUser.name}`, "user");
+        }
       } else {
         // Create new user
         const newUser = await RestaurantService.createUser(formData);
         setUsers((prev) => [...prev, newUser]);
+        recordAction(`Created user ${newUser.name} (${newUser.role})`, "user");
       }
 
       // Reset form
@@ -161,6 +172,10 @@ export default function Users() {
       });
       setUsers((prev) =>
         prev.map((user) => (user.id === userId ? updatedUser : user)),
+      );
+      recordAction(
+        `${active ? "Activated" : "Deactivated"} user ${updatedUser.name}`,
+        "permission",
       );
     } catch (error) {
       console.error("Failed to update user status:", error);
