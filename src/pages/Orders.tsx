@@ -48,6 +48,7 @@ import {
 import { SwipeToAction } from "@/components/ui/swipe-to-action";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuditLog } from "@/contexts/AuditLogContext";
 import { useUser } from "@/contexts/UserContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
@@ -63,6 +64,7 @@ interface NewOrderItem {
 
 export default function Orders() {
   const { currentUser } = useUser();
+  const { recordAction } = useAuditLog();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
 
@@ -339,6 +341,7 @@ export default function Orders() {
 
       const createdOrder = await RestaurantService.createOrder(orderData);
       setOrders((prev) => [createdOrder, ...prev]);
+      recordAction(`Created order ${createdOrder.id}`);
 
       // Reset form
       setNewOrder({ tableNumber: "", serverName: "", notes: "" });

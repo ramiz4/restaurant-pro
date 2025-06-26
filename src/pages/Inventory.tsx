@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SwipeToAction } from "@/components/ui/swipe-to-action";
+import { useAuditLog } from "@/contexts/AuditLogContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePullToRefresh } from "@/hooks/use-pull-to-refresh";
 import { InventoryItem } from "@/lib/mock-data";
@@ -52,6 +53,7 @@ export default function Inventory() {
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const isMobile = useIsMobile();
+  const { recordAction } = useAuditLog();
 
   // Form state for new items
   const [formData, setFormData] = useState({
@@ -170,10 +172,12 @@ export default function Inventory() {
         setInventory((prev) =>
           prev.map((item) => (item.id === editingItem.id ? updatedItem : item)),
         );
+        recordAction(`Updated inventory item ${updatedItem.name}`);
       } else {
         // Add new item
         const newItem = await RestaurantService.addInventoryItem(itemData);
         setInventory((prev) => [...prev, newItem]);
+        recordAction(`Added inventory item ${newItem.name}`);
       }
 
       resetForm();
@@ -198,6 +202,7 @@ export default function Inventory() {
       setInventory((prev) =>
         prev.map((item) => (item.id === selectedItem.id ? updatedItem : item)),
       );
+      recordAction(`Restocked item ${updatedItem.name}`);
 
       // Reset form
       setRestockData({ quantity: "", cost: "" });
@@ -233,6 +238,7 @@ export default function Inventory() {
     try {
       // Simulate delete by removing from local state
       setInventory((prev) => prev.filter((item) => item.id !== itemId));
+      recordAction(`Deleted inventory item ${itemId}`);
     } catch (error) {
       console.error("Failed to delete inventory item:", error);
     }
