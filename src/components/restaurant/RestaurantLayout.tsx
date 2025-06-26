@@ -6,6 +6,7 @@ import {
   BarChart3,
   ChefHat,
   LayoutDashboard,
+  ListChecks,
   LogOut,
   Menu,
   MenuIcon,
@@ -37,6 +38,7 @@ const iconMap = {
   Package,
   Users,
   BarChart3,
+  ListChecks,
 };
 
 export function RestaurantLayout({ children }: RestaurantLayoutProps) {
