@@ -11,7 +11,10 @@ import { cleanup, render, screen } from "@/test-utils/react-testing-library";
 import { ProtectedRoute } from "./ProtectedRoute";
 
 vi.mock("react-router-dom", async () => {
-  const actual: any = await vi.importActual("react-router-dom");
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     Navigate: ({ to }: { to: string }) => <div>redirect:{to}</div>,
@@ -47,7 +50,12 @@ function renderWithRouter(ui: ReactElement) {
 
 describe("ProtectedRoute", () => {
   it("shows skeleton while loading user context", () => {
-    mockedUseUser.mockReturnValue({ isLoading: true } as any);
+    mockedUseUser.mockReturnValue({
+      currentUser: null,
+      setCurrentUser: vi.fn(),
+      logout: vi.fn(),
+      isLoading: true,
+    });
     mockedUsePermissions.mockReturnValue({
       currentUser: null,
       hasPageAccess: vi.fn(),
@@ -64,7 +72,12 @@ describe("ProtectedRoute", () => {
   });
 
   it("redirects to login when no user is present", () => {
-    mockedUseUser.mockReturnValue({ isLoading: false } as any);
+    mockedUseUser.mockReturnValue({
+      currentUser: null,
+      setCurrentUser: vi.fn(),
+      logout: vi.fn(),
+      isLoading: false,
+    });
     mockedUsePermissions.mockReturnValue({
       currentUser: null,
       hasPageAccess: vi.fn(),
@@ -81,7 +94,12 @@ describe("ProtectedRoute", () => {
   });
 
   it("redirects to dashboard when user lacks page access", () => {
-    mockedUseUser.mockReturnValue({ isLoading: false } as any);
+    mockedUseUser.mockReturnValue({
+      currentUser: { role: "Server" },
+      setCurrentUser: vi.fn(),
+      logout: vi.fn(),
+      isLoading: false,
+    });
     mockedUsePermissions.mockReturnValue({
       currentUser: { role: "Server" },
       hasPageAccess: () => false,
