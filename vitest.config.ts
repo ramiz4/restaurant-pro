@@ -7,6 +7,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@testing-library/react": path.resolve(
+        __dirname,
+        "./src/test-utils/react-testing-library.ts",
+      ),
     },
   },
   test: {
