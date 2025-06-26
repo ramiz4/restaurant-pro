@@ -177,8 +177,7 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-    // We only want to register the listener once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Register the listener only once when the hook mounts
   }, []);
 
   return {
