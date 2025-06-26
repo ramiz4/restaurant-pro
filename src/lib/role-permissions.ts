@@ -39,6 +39,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
         },
         { page: "users", actions: ["create", "view", "edit", "delete"] },
         { page: "reports", actions: ["view", "export"] },
+        { page: "schedule", actions: ["create", "view", "edit", "delete"] },
         { page: "audit-log", actions: ["view"] },
       ],
     },
@@ -51,6 +52,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
         { page: "inventory", actions: ["view", "edit", "restock"] },
         { page: "users", actions: ["view"] },
         { page: "reports", actions: ["view", "export"] },
+        { page: "schedule", actions: ["create", "view", "edit", "delete"] },
       ],
     },
     Server: {
@@ -60,6 +62,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
         { page: "menu", actions: ["view"] },
         { page: "tables", actions: ["view", "edit", "reserve"] },
         { page: "inventory", actions: ["view"] },
+        { page: "schedule", actions: ["view"] },
       ],
     },
     "Kitchen Staff": {
@@ -68,6 +71,7 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
         { page: "orders", actions: ["view", "edit"] }, // Can update order status
         { page: "menu", actions: ["view"] },
         { page: "inventory", actions: ["view"] },
+        { page: "schedule", actions: ["view"] },
       ],
     },
   };
@@ -160,6 +164,12 @@ export const NAVIGATION_ITEMS = [
     href: "/reports",
     icon: "BarChart3",
     requiredPage: "reports",
+  },
+  {
+    name: "Schedule",
+    href: "/schedule",
+    icon: "CalendarCheck2",
+    requiredPage: "schedule",
   },
   {
     name: "Audit Log",

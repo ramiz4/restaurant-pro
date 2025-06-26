@@ -108,6 +108,7 @@ A modern, full-featured restaurant management application built with React, Type
 - **Real-time Updates**: Live data synchronization
 - **Real-time Notifications**: Role-specific alerts for new orders and low stock
 - **Online Ordering Interface**: Customers can place orders directly from a dedicated page
+- **Staff Scheduling**: Manage staff shifts with role-based permissions
 - **Search & Filtering**: Advanced search capabilities across all modules
 - **Modern UI**: Clean, intuitive interface built with shadcn/ui components
 - **Accessibility**: WCAG compliant design
@@ -405,7 +406,7 @@ The application is fully responsive and optimized for:
 - **Integration with POS Systems**: Enterprise-grade point of sale integration
 - **Customer Feedback System**: Role-based customer interaction management
 - **Online Ordering Integration**: _Implemented_ - Customers can submit orders online
-- **Staff Scheduling Module**: Role-based schedule management
+- **Staff Scheduling Module**: _Implemented_ - Role-based schedule management
 - **Supplier Management**: Vendor relationships with permission controls
 
 ## 🚀 Deployment
@@ -474,6 +475,7 @@ For support and questions:
 - [Radix UI](https://www.radix-ui.com/) for accessible primitives
 - [Lucide](https://lucide.dev/) for the icon library
 - [Tailwind CSS](https://tailwindcss.com/) for the styling framework
+- Personal thanks to the **Fusion Starter** template (see `CLAUDE.md`) whose design choices inspired our React, Tailwind, and testing setup
 
 ---
 

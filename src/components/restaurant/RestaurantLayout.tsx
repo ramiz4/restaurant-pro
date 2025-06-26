@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import {
   BarChart3,
+  CalendarCheck2,
   ChefHat,
   LayoutDashboard,
   ListChecks,
@@ -40,6 +41,7 @@ const iconMap = {
   Users,
   BarChart3,
   ListChecks,
+  CalendarCheck2,
 };
 
 export function RestaurantLayout({ children }: RestaurantLayoutProps) {
