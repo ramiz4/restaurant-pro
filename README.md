@@ -107,6 +107,7 @@ A modern, full-featured restaurant management application built with React, Type
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
 - **Real-time Updates**: Live data synchronization
 - **Real-time Notifications**: Role-specific alerts for new orders and low stock
+- **Online Ordering Interface**: Customers can place orders directly from a dedicated page
 - **Search & Filtering**: Advanced search capabilities across all modules
 - **Modern UI**: Clean, intuitive interface built with shadcn/ui components
 - **Accessibility**: WCAG compliant design
@@ -403,7 +404,7 @@ The application is fully responsive and optimized for:
 - **Advanced Reporting Features**: Role-based report customization
 - **Integration with POS Systems**: Enterprise-grade point of sale integration
 - **Customer Feedback System**: Role-based customer interaction management
-- **Online Ordering Integration**: Customer-facing ordering with staff notifications
+- **Online Ordering Integration**: _Implemented_ - Customers can submit orders online
 - **Staff Scheduling Module**: Role-based schedule management
 - **Supplier Management**: Vendor relationships with permission controls
 
