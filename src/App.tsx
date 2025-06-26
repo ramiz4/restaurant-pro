@@ -24,6 +24,7 @@ const Users = lazy(() => import("./pages/Users"));
 const Reports = lazy(() => import("./pages/Reports"));
 const AuditLog = lazy(() => import("./pages/AuditLog"));
 const OnlineOrder = lazy(() => import("./pages/OnlineOrder"));
+const CreateOrder = lazy(() => import("./pages/CreateOrder"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const Login = lazy(() => import("./pages/Login"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -133,6 +134,14 @@ const App = () => (
                     element={
                       <ProtectedRoute requiredPage="audit-log">
                         <AuditLog />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/create-order"
+                    element={
+                      <ProtectedRoute requiredPage="orders">
+                        <CreateOrder />
                       </ProtectedRoute>
                     }
                   />
