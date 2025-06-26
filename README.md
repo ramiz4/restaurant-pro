@@ -355,6 +355,22 @@ npm run test
 
 Test files should be placed alongside source files with `.test.ts` or `.spec.ts` extensions.
 
+## 📝 Linting
+
+Check code quality with:
+
+```bash
+npm run lint
+```
+
+## 🏗️ Build
+
+Create a production build with:
+
+```bash
+npm run build
+```
+
 ## 📱 Responsive Design
 
 The application is fully responsive and optimized for:
@@ -405,8 +421,8 @@ This project is configured for automatic deployment to GitHub Pages using GitHub
 
 #### Automatic Deployment:
 
-- **Trigger**: Every push to the `main` branch
-- **Process**: Build → Test → Lint → Deploy
+- **Trigger**: Successful `CI` workflow on the `main` branch
+- **Process**: CI builds and uploads artifacts → Deploy workflow publishes them
 - **URL**: `https://ramiz4.github.io/restaurant-pro/`
 
 #### Manual Deployment:
@@ -421,11 +437,7 @@ npm run preview
 
 The deployment workflow includes:
 
-- ✅ Dependency installation
-- ✅ TypeScript type checking
-- ✅ ESLint code quality checks
-- ✅ Test execution
-- ✅ Production build
+- ✅ Downloading build artifacts from CI
 - ✅ Automatic deployment to GitHub Pages
 
 ## 🤝 Contributing
