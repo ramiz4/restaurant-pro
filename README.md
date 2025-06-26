@@ -106,6 +106,7 @@ A modern, full-featured restaurant management application built with React, Type
 - **Dark/Light Theme**: Complete theme switching support
 - **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
 - **Real-time Updates**: Live data synchronization
+- **Real-time Notifications**: Role-specific alerts for new orders and low stock
 - **Search & Filtering**: Advanced search capabilities across all modules
 - **Modern UI**: Clean, intuitive interface built with shadcn/ui components
 - **Accessibility**: WCAG compliant design
@@ -235,6 +236,7 @@ Each role demonstrates different permission levels and UI adaptations.
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
 - `npm run test` - Run unit tests
+- `npm run notify-server` - Start the real-time notification server
 - `npm run format.fix` - Format code with Prettier
 - `npm run typecheck` - Run TypeScript type checking
 
@@ -247,6 +249,12 @@ Each role demonstrates different permission levels and UI adaptations.
 3. **Dashboard**: Interface adapts to show relevant information for your role
 4. **Navigation**: Menu items filter automatically based on your permissions
 5. **Features**: Access only the features authorized for your role
+
+### Real-time Notifications
+
+Start the notification server with `npm run notify-server`. When a new order is
+created or an inventory item falls below its minimum stock level, connected
+clients receive a toast alert tailored to their role.
 
 ### Role-Specific Workflows
 
@@ -392,7 +400,6 @@ The application is fully responsive and optimized for:
 - **Advanced RBAC Features**: Custom role creation, permission inheritance
 - **Audit Logging**: Track user actions and permission changes
 - **Multi-tenant Support**: Support for multiple restaurant locations
-- **Real-time Notifications**: Push notifications for role-specific events
 - **Advanced Reporting Features**: Role-based report customization
 - **Integration with POS Systems**: Enterprise-grade point of sale integration
 - **Customer Feedback System**: Role-based customer interaction management

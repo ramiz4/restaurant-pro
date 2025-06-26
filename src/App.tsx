@@ -4,12 +4,14 @@ import { HashRouter, Route, Routes } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import { NotificationListener } from "@/components/restaurant/NotificationListener";
 import { ProtectedRoute } from "@/components/restaurant/ProtectedRoute";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuditLogProvider } from "@/contexts/AuditLogContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { UserProvider } from "@/contexts/UserContext";
 
 // Lazy load page components
@@ -43,91 +45,94 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <UserProvider>
       <AuditLogProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <HashRouter>
-            <Suspense fallback={<PageLoading />}>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute requiredPage="dashboard">
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute requiredPage="dashboard">
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/orders"
-                  element={
-                    <ProtectedRoute requiredPage="orders">
-                      <Orders />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/menu"
-                  element={
-                    <ProtectedRoute requiredPage="menu">
-                      <Menu />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/tables"
-                  element={
-                    <ProtectedRoute requiredPage="tables">
-                      <Tables />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/inventory"
-                  element={
-                    <ProtectedRoute requiredPage="inventory">
-                      <Inventory />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/users"
-                  element={
-                    <ProtectedRoute requiredPage="users">
-                      <Users />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/reports"
-                  element={
-                    <ProtectedRoute requiredPage="reports">
-                      <Reports />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/audit-log"
-                  element={
-                    <ProtectedRoute requiredPage="audit-log">
-                      <AuditLog />
-                    </ProtectedRoute>
-                  }
-                />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </HashRouter>
-        </TooltipProvider>
+        <NotificationProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <NotificationListener />
+            <HashRouter>
+              <Suspense fallback={<PageLoading />}>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute requiredPage="dashboard">
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute requiredPage="dashboard">
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/orders"
+                    element={
+                      <ProtectedRoute requiredPage="orders">
+                        <Orders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/menu"
+                    element={
+                      <ProtectedRoute requiredPage="menu">
+                        <Menu />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/tables"
+                    element={
+                      <ProtectedRoute requiredPage="tables">
+                        <Tables />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/inventory"
+                    element={
+                      <ProtectedRoute requiredPage="inventory">
+                        <Inventory />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/users"
+                    element={
+                      <ProtectedRoute requiredPage="users">
+                        <Users />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/reports"
+                    element={
+                      <ProtectedRoute requiredPage="reports">
+                        <Reports />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/audit-log"
+                    element={
+                      <ProtectedRoute requiredPage="audit-log">
+                        <AuditLog />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </HashRouter>
+          </TooltipProvider>
+        </NotificationProvider>
       </AuditLogProvider>
     </UserProvider>
   </QueryClientProvider>
