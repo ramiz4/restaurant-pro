@@ -1,7 +1,5 @@
 # RestaurantPro - Complete Restaurant Management System
 
-[![codecov](https://codecov.io/gh/ramiz4/restaurant-pro/branch/main/graph/badge.svg)](https://codecov.io/gh/ramiz4/restaurant-pro)
-
 A modern, full-featured restaurant management application built with React, TypeScript, and Tailwind CSS. This application provides comprehensive tools for managing all aspects of restaurant operations including orders, menu management, table reservations, inventory tracking, staff management, and analytics.
 
 **🔐 Now featuring comprehensive Role-Based Access Control (RBAC) with 4 distinct user roles!**
