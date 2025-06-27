@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
-import { cn, pointsWithinDistance } from "@/lib/utils";
+import { clamp, cn, pointsWithinDistance } from "@/lib/utils";
 
 import { PermissionGuard } from "./PermissionGuard";
 
@@ -70,8 +70,12 @@ export function TableLayoutView() {
     if (!dragging) return;
     const container = e.currentTarget;
     const rect = container.getBoundingClientRect();
-    const x = e.clientX - rect.left - dragOffset.x;
-    const y = e.clientY - rect.top - dragOffset.y;
+    const rawX = e.clientX - rect.left - dragOffset.x;
+    const rawY = e.clientY - rect.top - dragOffset.y;
+    const maxX = rect.width - TABLE_SIZE;
+    const maxY = rect.height - TABLE_SIZE;
+    const x = clamp(rawX, 0, maxX);
+    const y = clamp(rawY, 0, maxY);
     setPositions((prev) => ({ ...prev, [dragging]: { x, y } }));
   };
 
