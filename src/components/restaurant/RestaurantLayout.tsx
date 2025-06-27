@@ -114,22 +114,27 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
 
           const IconComponent = iconMap[item.icon as keyof typeof iconMap];
 
-          return (
-            <SheetClose asChild>
-              <Link
-                key={item.name}
-                to={item.href}
-                className={cn(
-                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
-                )}
-              >
-                <IconComponent className="mr-3 h-5 w-5" />
-                {item.name}
-              </Link>
+          const link = (
+            <Link
+              to={item.href}
+              className={cn(
+                "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
+              )}
+            >
+              <IconComponent className="mr-3 h-5 w-5" />
+              {item.name}
+            </Link>
+          );
+
+          return isMobile ? (
+            <SheetClose key={item.name} asChild>
+              {link}
             </SheetClose>
+          ) : (
+            <span key={item.name}>{link}</span>
           );
         })}
       </nav>
