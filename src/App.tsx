@@ -19,7 +19,6 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Orders = lazy(() => import("./pages/Orders"));
 const Menu = lazy(() => import("./pages/Menu"));
 const Tables = lazy(() => import("./pages/Tables"));
-const TableLayout = lazy(() => import("./pages/TableLayout"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const Users = lazy(() => import("./pages/Users"));
 const Reports = lazy(() => import("./pages/Reports"));
@@ -95,14 +94,6 @@ const App = () => (
                     element={
                       <ProtectedRoute requiredPage="tables">
                         <Tables />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/table-layout"
-                    element={
-                      <ProtectedRoute requiredPage="table-layout">
-                        <TableLayout />
                       </ProtectedRoute>
                     }
                   />

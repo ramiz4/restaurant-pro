@@ -66,6 +66,7 @@ A modern, full-featured restaurant management application built with React, Type
 - Capacity management
 - Table assignment to orders
 - **Permission-controlled reservations**: Only authorized roles can create/modify reservations
+- Unified page for layout configuration and table management
 
 ### 📦 Inventory Management
 

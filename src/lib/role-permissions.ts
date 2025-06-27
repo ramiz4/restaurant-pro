@@ -33,7 +33,6 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
           page: "tables",
           actions: ["create", "view", "edit", "delete", "reserve"],
         },
-        { page: "table-layout", actions: ["view", "edit"] },
         {
           page: "inventory",
           actions: ["create", "view", "edit", "delete", "restock"],
@@ -50,7 +49,6 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
         { page: "orders", actions: ["create", "view", "edit", "payment"] },
         { page: "menu", actions: ["create", "view", "edit", "delete"] },
         { page: "tables", actions: ["view", "edit", "reserve"] },
-        { page: "table-layout", actions: ["view", "edit"] },
         { page: "inventory", actions: ["view", "edit", "restock"] },
         { page: "users", actions: ["view"] },
         { page: "reports", actions: ["view", "export"] },
@@ -63,7 +61,6 @@ export const DEFAULT_ROLE_DEFINITIONS: Record<DefaultUserRole, RoleDefinition> =
         { page: "orders", actions: ["create", "view", "edit"] },
         { page: "menu", actions: ["view"] },
         { page: "tables", actions: ["view", "edit", "reserve"] },
-        { page: "table-layout", actions: ["view", "edit"] },
         { page: "inventory", actions: ["view"] },
         { page: "schedule", actions: ["view"] },
       ],
@@ -155,12 +152,6 @@ export const NAVIGATION_ITEMS = [
   },
   { name: "Menu", href: "/menu", icon: "MenuIcon", requiredPage: "menu" },
   { name: "Tables", href: "/tables", icon: "ChefHat", requiredPage: "tables" },
-  {
-    name: "Table Layout",
-    href: "/table-layout",
-    icon: "LayoutDashboard",
-    requiredPage: "table-layout",
-  },
   {
     name: "Inventory",
     href: "/inventory",

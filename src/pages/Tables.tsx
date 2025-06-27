@@ -4,6 +4,7 @@ import { Calendar, CheckCircle, Sparkles, Users } from "lucide-react";
 
 import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
 import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
+import { TableLayoutView } from "@/components/restaurant/TableLayoutView";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -512,6 +513,11 @@ export default function Tables() {
                 onSelect={handleSelectTable}
               />
             ))}
+          </div>
+
+          <div className="pt-6 space-y-4">
+            <h2 className="text-xl font-semibold">Table Layout</h2>
+            <TableLayoutView />
           </div>
         </div>
 
