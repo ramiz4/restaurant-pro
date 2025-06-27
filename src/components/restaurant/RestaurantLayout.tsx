@@ -1,20 +1,8 @@
 import { ReactNode, useEffect, useState } from "react";
 
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
-import {
-  BarChart3,
-  CalendarCheck2,
-  ChefHat,
-  LayoutDashboard,
-  ListChecks,
-  LogOut,
-  Menu,
-  MenuIcon,
-  Package,
-  ShoppingCart,
-  Users,
-} from "lucide-react";
+import { ChefHat, LogOut, Menu } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,24 +13,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { usePermissions } from "@/hooks/use-permissions";
 import { cn } from "@/lib/utils";
 
+import { MainMenu } from "./MainMenu";
 import { ThemeToggle } from "./ThemeToggle";
 
 interface RestaurantLayoutProps {
   children: ReactNode;
 }
-
-// Icon mapping for dynamic icon rendering
-const iconMap = {
-  LayoutDashboard,
-  ShoppingCart,
-  MenuIcon,
-  ChefHat,
-  Package,
-  Users,
-  BarChart3,
-  ListChecks,
-  CalendarCheck2,
-};
 
 export function RestaurantLayout({ children }: RestaurantLayoutProps) {
   const location = useLocation();
@@ -101,36 +77,8 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-4 py-4">
-        {navigation.map((item) => {
-          const isActive =
-            location.pathname === item.href ||
-            (item.href === "/dashboard" && location.pathname === "/");
-
-          const IconComponent = iconMap[item.icon as keyof typeof iconMap];
-
-          const link = (
-            <Link
-              to={item.href}
-              onClick={() => {
-                if (isMobile) {
-                  setSidebarOpen(false);
-                }
-              }}
-              className={cn(
-                "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
-              )}
-            >
-              <IconComponent className="mr-3 h-5 w-5" />
-              {item.name}
-            </Link>
-          );
-
-          return <span key={item.name}>{link}</span>;
-        })}
+      <nav className="flex-1 px-4 py-4">
+        <MainMenu onNavigate={() => setSidebarOpen(false)} />
       </nav>
 
       {/* User info */}
