@@ -30,3 +30,7 @@ export function pointsWithinDistance(
   const dy = a.y - b.y;
   return Math.hypot(dx, dy) < distance;
 }
+
+export function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}

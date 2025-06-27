@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cn, pointsWithinDistance, rectanglesOverlap } from "./utils";
+import { clamp, cn, pointsWithinDistance, rectanglesOverlap } from "./utils";
 
 describe("cn function", () => {
   it("should merge classes correctly", () => {
@@ -53,5 +53,11 @@ describe("cn function", () => {
     const a = { x: 0, y: 0 };
     const b = { x: 100, y: 100 };
     expect(pointsWithinDistance(a, b, 60)).toBe(false);
+  });
+
+  it("should clamp values within range", () => {
+    expect(clamp(10, 0, 5)).toBe(5);
+    expect(clamp(-2, 0, 5)).toBe(0);
+    expect(clamp(3, 0, 5)).toBe(3);
   });
 });
