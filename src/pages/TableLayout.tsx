@@ -15,6 +15,8 @@ interface Position {
 export default function TableLayout() {
   const [tables, setTables] = useState<Table[]>([]);
   const [positions, setPositions] = useState<Record<string, Position>>({});
+  const [dragging, setDragging] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +40,35 @@ export default function TableLayout() {
     setPositions((prev) => ({ ...prev, [id]: { x, y } }));
   };
 
+  const handlePointerDown =
+    (id: string) => (e: React.PointerEvent<HTMLDivElement>) => {
+      const container =
+        (e.currentTarget.parentElement as HTMLDivElement) ?? null;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left - (positions[id]?.x ?? 0);
+      const offsetY = e.clientY - rect.top - (positions[id]?.y ?? 0);
+      setDragOffset({ x: offsetX, y: offsetY });
+      setDragging(id);
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging) return;
+    const container = e.currentTarget;
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left - dragOffset.x;
+    const y = e.clientY - rect.top - dragOffset.y;
+    setPositions((prev) => ({ ...prev, [dragging]: { x, y } }));
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragging) {
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+    }
+    setDragging(null);
+  };
+
   const statusColor = (status: Table["status"]) => {
     switch (status) {
       case "available":
@@ -55,12 +86,17 @@ export default function TableLayout() {
     <RestaurantLayout>
       <PermissionGuard page="table-layout">
         <h1 className="text-2xl font-bold mb-4">Table Layout</h1>
-        <div className="relative w-full h-[600px] rounded-md border bg-white dark:bg-gray-800">
+        <div
+          className="relative w-full h-[600px] rounded-md border bg-white dark:bg-gray-800"
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
           {tables.map((t) => (
             <div
               key={t.id}
               draggable
               onDragEnd={(e) => handleDragEnd(t.id, e)}
+              onPointerDown={handlePointerDown(t.id)}
               className={cn(
                 "absolute w-24 h-24 flex flex-col items-center justify-center rounded-md border-2 cursor-move select-none",
                 statusColor(t.status),
