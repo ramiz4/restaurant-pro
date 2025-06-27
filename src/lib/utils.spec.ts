@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cn, rectanglesOverlap } from "./utils";
+import { cn, pointsWithinDistance, rectanglesOverlap } from "./utils";
 
 describe("cn function", () => {
   it("should merge classes correctly", () => {
@@ -41,5 +41,17 @@ describe("cn function", () => {
     const a = { x: 0, y: 0, width: 50, height: 50 };
     const b = { x: 60, y: 60, width: 50, height: 50 };
     expect(rectanglesOverlap(a, b)).toBe(false);
+  });
+
+  it("should detect points within distance", () => {
+    const a = { x: 0, y: 0 };
+    const b = { x: 30, y: 40 };
+    expect(pointsWithinDistance(a, b, 60)).toBe(true);
+  });
+
+  it("should detect points outside distance", () => {
+    const a = { x: 0, y: 0 };
+    const b = { x: 100, y: 100 };
+    expect(pointsWithinDistance(a, b, 60)).toBe(false);
   });
 });
