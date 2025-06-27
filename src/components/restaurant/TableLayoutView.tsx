@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
-import { cn } from "@/lib/utils";
+import { cn, rectanglesOverlap } from "@/lib/utils";
 
 import { PermissionGuard } from "./PermissionGuard";
 
@@ -24,6 +24,8 @@ interface Position {
   x: number;
   y: number;
 }
+
+const TABLE_SIZE = 96;
 
 export function TableLayoutView() {
   const [tables, setTables] = useState<Table[]>([]);
@@ -62,13 +64,37 @@ export function TableLayoutView() {
       e.currentTarget.setPointerCapture?.(e.pointerId);
     };
 
+  const hasCollision = (
+    id: string,
+    x: number,
+    y: number,
+    current: Record<string, Position>,
+  ) => {
+    const currentRect = { x, y, width: TABLE_SIZE, height: TABLE_SIZE };
+    return Object.entries(current).some(([otherId, pos]) => {
+      if (otherId === id) return false;
+      const otherRect = {
+        x: pos.x,
+        y: pos.y,
+        width: TABLE_SIZE,
+        height: TABLE_SIZE,
+      };
+      return rectanglesOverlap(currentRect, otherRect);
+    });
+  };
+
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging) return;
     const container = e.currentTarget;
     const rect = container.getBoundingClientRect();
     const x = e.clientX - rect.left - dragOffset.x;
     const y = e.clientY - rect.top - dragOffset.y;
-    setPositions((prev) => ({ ...prev, [dragging]: { x, y } }));
+    setPositions((prev) => {
+      if (hasCollision(dragging, x, y, prev)) {
+        return prev;
+      }
+      return { ...prev, [dragging]: { x, y } };
+    });
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {

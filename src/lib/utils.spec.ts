@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cn } from "./utils";
+import { cn, rectanglesOverlap } from "./utils";
 
 describe("cn function", () => {
   it("should merge classes correctly", () => {
@@ -29,5 +29,17 @@ describe("cn function", () => {
     expect(cn("base", { conditional: true, "not-included": false })).toBe(
       "base conditional",
     );
+  });
+
+  it("should detect rectangle overlap", () => {
+    const a = { x: 0, y: 0, width: 50, height: 50 };
+    const b = { x: 25, y: 25, width: 50, height: 50 };
+    expect(rectanglesOverlap(a, b)).toBe(true);
+  });
+
+  it("should detect rectangle no overlap", () => {
+    const a = { x: 0, y: 0, width: 50, height: 50 };
+    const b = { x: 60, y: 60, width: 50, height: 50 };
+    expect(rectanglesOverlap(a, b)).toBe(false);
   });
 });
