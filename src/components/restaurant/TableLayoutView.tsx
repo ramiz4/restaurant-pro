@@ -18,6 +18,8 @@ import { Table } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
 
+import { PermissionGuard } from "./PermissionGuard";
+
 interface Position {
   x: number;
   y: number;
@@ -149,10 +151,12 @@ export function TableLayoutView() {
   return (
     <div className="space-y-2">
       <div className="flex justify-end">
-        <Button size="sm" onClick={openAddDialog}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Table
-        </Button>
+        <PermissionGuard page="tables" action="create">
+          <Button size="sm" onClick={openAddDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Table
+          </Button>
+        </PermissionGuard>
       </div>
       <div
         className="relative w-full h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
@@ -173,22 +177,26 @@ export function TableLayoutView() {
             }}
           >
             <div className="absolute top-1 right-1 flex space-x-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5"
-                onClick={() => openEditDialog(t)}
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-5 w-5"
-                onClick={() => handleDelete(t.id)}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
+              <PermissionGuard page="tables" action="edit">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5"
+                  onClick={() => openEditDialog(t)}
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+              </PermissionGuard>
+              <PermissionGuard page="tables" action="delete">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5"
+                  onClick={() => handleDelete(t.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </PermissionGuard>
             </div>
             <span className="font-medium">Table {t.number}</span>
             <Badge variant="outline" className="text-xs capitalize mt-1">
