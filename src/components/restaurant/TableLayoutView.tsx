@@ -49,6 +49,8 @@ export function TableLayoutView() {
 
   const handlePointerDown =
     (id: string) => (e: React.PointerEvent<HTMLDivElement>) => {
+      // Ignore drag start when interacting with a button inside the table
+      if ((e.target as HTMLElement).closest("button")) return;
       const container =
         (e.currentTarget.parentElement as HTMLDivElement) ?? null;
       if (!container) return;
