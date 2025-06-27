@@ -187,7 +187,7 @@ export function TableLayoutView() {
         </PermissionGuard>
       </div>
       <div
-        className="relative w-full h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
+        className="relative w-[600px] h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
       >
