@@ -259,6 +259,17 @@ Start the notification server with `npm run notify-server`. When a new order is
 created or an inventory item falls below its minimum stock level, connected
 clients receive a toast alert tailored to their role.
 
+### Troubleshooting
+
+If you see a browser error like `GET http://localhost:4001/events net::ERR_CONNECTION_REFUSED`,
+the notification server isn't running. Open a second terminal and run:
+
+```bash
+npm run notify-server
+```
+
+This will start the real-time event stream required for toast alerts.
+
 ### Role-Specific Workflows
 
 #### 👨‍💼 Administrator
