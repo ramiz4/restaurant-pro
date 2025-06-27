@@ -26,6 +26,7 @@ interface Position {
 }
 
 const TABLE_SIZE = 96;
+const ROOM_SIZE = 600;
 
 export function TableLayoutView() {
   const [tables, setTables] = useState<Table[]>([]);
@@ -42,8 +43,11 @@ export function TableLayoutView() {
       const data = await RestaurantService.getTables();
       setTables(data);
       const initial: Record<string, Position> = {};
+      const max = ROOM_SIZE - TABLE_SIZE;
       data.forEach((t, i) => {
-        initial[t.id] = { x: (i % 5) * 120, y: Math.floor(i / 5) * 120 };
+        const x = clamp((i % 5) * 120, 0, max);
+        const y = clamp(Math.floor(i / 5) * 120, 0, max);
+        initial[t.id] = { x, y };
       });
       setPositions(initial);
     };
