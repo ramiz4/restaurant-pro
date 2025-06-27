@@ -117,6 +117,11 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
           const link = (
             <Link
               to={item.href}
+              onClick={() => {
+                if (isMobile) {
+                  setSidebarOpen(false);
+                }
+              }}
               className={cn(
                 "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
