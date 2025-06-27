@@ -189,6 +189,39 @@ export class RestaurantService {
     throw new Error("Table not found");
   }
 
+  static async createTable(table: Omit<Table, "id">): Promise<Table> {
+    await delay(300);
+    const newTable: Table = {
+      ...table,
+      id: String(mockTables.length + 1),
+    };
+    mockTables.push(newTable);
+    return newTable;
+  }
+
+  static async updateTable(
+    id: string,
+    updates: Partial<Table>,
+  ): Promise<Table> {
+    await delay(300);
+    const tableIndex = mockTables.findIndex((t) => t.id === id);
+    if (tableIndex !== -1) {
+      mockTables[tableIndex] = { ...mockTables[tableIndex], ...updates };
+      return mockTables[tableIndex];
+    }
+    throw new Error("Table not found");
+  }
+
+  static async deleteTable(id: string): Promise<void> {
+    await delay(300);
+    const tableIndex = mockTables.findIndex((t) => t.id === id);
+    if (tableIndex !== -1) {
+      mockTables.splice(tableIndex, 1);
+      return;
+    }
+    throw new Error("Table not found");
+  }
+
   // Inventory
   static async getInventory(): Promise<InventoryItem[]> {
     await delay(250);

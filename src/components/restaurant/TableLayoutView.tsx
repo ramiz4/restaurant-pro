@@ -1,6 +1,19 @@
 import { useEffect, useState } from "react";
 
+import { Edit, Plus, Trash2 } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
 import { cn } from "@/lib/utils";
@@ -15,6 +28,9 @@ export function TableLayoutView() {
   const [positions, setPositions] = useState<Record<string, Position>>({});
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<Position>({ x: 0, y: 0 });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingTable, setEditingTable] = useState<Table | null>(null);
+  const [formData, setFormData] = useState({ number: "", capacity: "" });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,6 +74,63 @@ export function TableLayoutView() {
     setDragging(null);
   };
 
+  const openAddDialog = () => {
+    setFormData({ number: "", capacity: "" });
+    setEditingTable(null);
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (table: Table) => {
+    setFormData({
+      number: String(table.number),
+      capacity: String(table.capacity),
+    });
+    setEditingTable(table);
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = {
+      number: parseInt(formData.number),
+      capacity: parseInt(formData.capacity),
+      status: "available" as const,
+    };
+    try {
+      if (editingTable) {
+        const updated = await RestaurantService.updateTable(
+          editingTable.id,
+          data,
+        );
+        setTables((prev) =>
+          prev.map((t) => (t.id === editingTable.id ? updated : t)),
+        );
+      } else {
+        const newTable = await RestaurantService.createTable(data);
+        setTables((prev) => [...prev, newTable]);
+        setPositions((prev) => ({ ...prev, [newTable.id]: { x: 0, y: 0 } }));
+      }
+    } catch (error) {
+      console.error("Failed to save table", error);
+    } finally {
+      setDialogOpen(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this table?")) return;
+    try {
+      await RestaurantService.deleteTable(id);
+      setTables((prev) => prev.filter((t) => t.id !== id));
+      setPositions((prev) => {
+        const { [id]: _removed, ...rest } = prev;
+        return rest;
+      });
+    } catch (error) {
+      console.error("Failed to delete table", error);
+    }
+  };
+
   const statusColor = (status: Table["status"]) => {
     switch (status) {
       case "available":
@@ -74,30 +147,112 @@ export function TableLayoutView() {
   };
 
   return (
-    <div
-      className="relative w-full h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-    >
-      {tables.map((t) => (
-        <div
-          key={t.id}
-          onPointerDown={handlePointerDown(t.id)}
-          className={cn(
-            "absolute w-24 h-24 flex flex-col items-center justify-center rounded-md border-2 cursor-move select-none",
-            statusColor(t.status),
-          )}
-          style={{
-            left: positions[t.id]?.x ?? 0,
-            top: positions[t.id]?.y ?? 0,
-          }}
-        >
-          <span className="font-medium">Table {t.number}</span>
-          <Badge variant="outline" className="text-xs capitalize mt-1">
-            {t.status === "available" ? "open" : t.status}
-          </Badge>
-        </div>
-      ))}
+    <div className="space-y-2">
+      <div className="flex justify-end">
+        <Button size="sm" onClick={openAddDialog}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Table
+        </Button>
+      </div>
+      <div
+        className="relative w-full h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+      >
+        {tables.map((t) => (
+          <div
+            key={t.id}
+            onPointerDown={handlePointerDown(t.id)}
+            className={cn(
+              "absolute w-24 h-24 flex flex-col items-center justify-center rounded-md border-2 cursor-move select-none",
+              statusColor(t.status),
+            )}
+            style={{
+              left: positions[t.id]?.x ?? 0,
+              top: positions[t.id]?.y ?? 0,
+            }}
+          >
+            <div className="absolute top-1 right-1 flex space-x-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5"
+                onClick={() => openEditDialog(t)}
+              >
+                <Edit className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5"
+                onClick={() => handleDelete(t.id)}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+            <span className="font-medium">Table {t.number}</span>
+            <Badge variant="outline" className="text-xs capitalize mt-1">
+              {t.status === "available" ? "open" : t.status}
+            </Badge>
+          </div>
+        ))}
+      </div>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingTable ? "Edit Table" : "Add New Table"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingTable
+                ? "Update the table details."
+                : "Enter details for the new table."}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="number">Table Number</Label>
+                <Input
+                  id="number"
+                  type="number"
+                  min="1"
+                  value={formData.number}
+                  onChange={(e) =>
+                    setFormData((p) => ({ ...p, number: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="capacity">Capacity</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  min="1"
+                  value={formData.capacity}
+                  onChange={(e) =>
+                    setFormData((p) => ({ ...p, capacity: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                {editingTable ? "Update Table" : "Add Table"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
