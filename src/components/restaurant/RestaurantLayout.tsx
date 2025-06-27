@@ -18,12 +18,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuditLog } from "@/contexts/AuditLogContext";
 import { useUser } from "@/contexts/UserContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -134,13 +129,7 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
             </Link>
           );
 
-          return isMobile ? (
-            <SheetClose key={item.name} asChild>
-              {link}
-            </SheetClose>
-          ) : (
-            <span key={item.name}>{link}</span>
-          );
+          return <span key={item.name}>{link}</span>;
         })}
       </nav>
 
