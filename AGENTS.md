@@ -12,10 +12,15 @@ This project uses React, TypeScript, and Tailwind CSS.
 - Run `npm run lint` and `npm run test` before committing code.
 - Apply formatting with `npm run format:fix` when necessary.
 - Add or update tests when introducing new functionality.
+- Ensure best practices and the SOLID principles are applied on all code changes.
 
 ## Documentation Changes
 
 - For changes limited to documentation (including this file), tests and linting are not required.
+
+## Layout Changes
+
+- Implement intuitive UX/UI whenever updating or creating layouts.
 
 ## Pull Requests
 
