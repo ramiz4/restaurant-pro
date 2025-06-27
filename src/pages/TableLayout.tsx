@@ -63,13 +63,15 @@ export default function TableLayout() {
   const statusColor = (status: Table["status"]) => {
     switch (status) {
       case "available":
-        return "border-green-600 bg-green-50";
+        return "border-green-600 bg-green-50 dark:border-green-400 dark:bg-green-950/30";
       case "occupied":
-        return "border-red-600 bg-red-50";
+        return "border-red-600 bg-red-50 dark:border-red-400 dark:bg-red-950/30";
       case "reserved":
-        return "border-blue-600 bg-blue-50";
+        return "border-blue-600 bg-blue-50 dark:border-blue-400 dark:bg-blue-950/30";
+      case "cleaning":
+        return "border-yellow-600 bg-yellow-50 dark:border-yellow-400 dark:bg-yellow-950/30";
       default:
-        return "border-gray-300 bg-gray-50";
+        return "border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-900";
     }
   };
 
@@ -78,7 +80,7 @@ export default function TableLayout() {
       <PermissionGuard page="table-layout">
         <h1 className="text-2xl font-bold mb-4">Table Layout</h1>
         <div
-          className="relative w-full h-[600px] rounded-md border bg-white dark:bg-gray-800 touch-none"
+          className="relative w-full h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
         >
