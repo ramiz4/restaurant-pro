@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 
-import { PermissionGuard } from "@/components/restaurant/PermissionGuard";
-import { RestaurantLayout } from "@/components/restaurant/RestaurantLayout";
 import { Badge } from "@/components/ui/badge";
 import { Table } from "@/lib/mock-data";
 import RestaurantService from "@/lib/restaurant-services";
@@ -12,7 +10,7 @@ interface Position {
   y: number;
 }
 
-export default function TableLayout() {
+export function TableLayoutView() {
   const [tables, setTables] = useState<Table[]>([]);
   const [positions, setPositions] = useState<Record<string, Position>>({});
   const [dragging, setDragging] = useState<string | null>(null);
@@ -76,35 +74,30 @@ export default function TableLayout() {
   };
 
   return (
-    <RestaurantLayout>
-      <PermissionGuard page="table-layout">
-        <h1 className="text-2xl font-bold mb-4">Table Layout</h1>
+    <div
+      className="relative w-full h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+    >
+      {tables.map((t) => (
         <div
-          className="relative w-full h-[600px] rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 touch-none"
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
+          key={t.id}
+          onPointerDown={handlePointerDown(t.id)}
+          className={cn(
+            "absolute w-24 h-24 flex flex-col items-center justify-center rounded-md border-2 cursor-move select-none",
+            statusColor(t.status),
+          )}
+          style={{
+            left: positions[t.id]?.x ?? 0,
+            top: positions[t.id]?.y ?? 0,
+          }}
         >
-          {tables.map((t) => (
-            <div
-              key={t.id}
-              onPointerDown={handlePointerDown(t.id)}
-              className={cn(
-                "absolute w-24 h-24 flex flex-col items-center justify-center rounded-md border-2 cursor-move select-none",
-                statusColor(t.status),
-              )}
-              style={{
-                left: positions[t.id]?.x ?? 0,
-                top: positions[t.id]?.y ?? 0,
-              }}
-            >
-              <span className="font-medium">Table {t.number}</span>
-              <Badge variant="outline" className="text-xs capitalize mt-1">
-                {t.status === "available" ? "open" : t.status}
-              </Badge>
-            </div>
-          ))}
+          <span className="font-medium">Table {t.number}</span>
+          <Badge variant="outline" className="text-xs capitalize mt-1">
+            {t.status === "available" ? "open" : t.status}
+          </Badge>
         </div>
-      </PermissionGuard>
-    </RestaurantLayout>
+      ))}
+    </div>
   );
 }

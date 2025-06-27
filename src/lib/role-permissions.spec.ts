@@ -67,7 +67,6 @@ describe("getNavigationItems", () => {
       "orders",
       "menu",
       "tables",
-      "table-layout",
       "inventory",
       "users",
       "reports",
@@ -82,7 +81,6 @@ describe("getNavigationItems", () => {
       "orders",
       "menu",
       "tables",
-      "table-layout",
       "inventory",
       "schedule",
     ]);
