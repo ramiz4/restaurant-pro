@@ -204,6 +204,7 @@ export default function Tables() {
   const [statusFilter, setStatusFilter] = useState<Table["status"][]>([]);
   const [loading, setLoading] = useState(true);
   const [isReservationDialogOpen, setIsReservationDialogOpen] = useState(false);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [reservationData, setReservationData] = useState({
     customerName: "",
@@ -266,6 +267,11 @@ export default function Tables() {
   const handleReservation = (table: Table) => {
     setSelectedTable(table);
     setIsReservationDialogOpen(true);
+  };
+
+  const handleSelectTable = (table: Table) => {
+    setSelectedTable(table);
+    setIsDetailsDialogOpen(true);
   };
 
   const submitReservation = async (e: React.FormEvent) => {
@@ -503,11 +509,73 @@ export default function Tables() {
                 table={table}
                 onStatusChange={handleStatusChange}
                 onReservation={handleReservation}
-                onSelect={setSelectedTable}
+                onSelect={handleSelectTable}
               />
             ))}
           </div>
         </div>
+
+        {/* Table Details Dialog */}
+        <Dialog
+          open={isDetailsDialogOpen}
+          onOpenChange={setIsDetailsDialogOpen}
+        >
+          <DialogContent className="sm:max-w-[425px] mx-4 sm:mx-0">
+            <DialogHeader>
+              <DialogTitle>Table {selectedTable?.number} Details</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-2 py-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Capacity:</span>
+                <span className="font-medium">
+                  {selectedTable?.capacity} people
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="font-medium capitalize">
+                  {selectedTable?.status}
+                </span>
+              </div>
+              {selectedTable?.currentOrder && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Current Order:</span>
+                  <span className="font-medium">
+                    {selectedTable.currentOrder}
+                  </span>
+                </div>
+              )}
+              {selectedTable?.reservedFor && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Reserved For:</span>
+                  <span className="font-medium">
+                    {selectedTable.reservedFor}
+                  </span>
+                </div>
+              )}
+              {selectedTable?.reservedAt && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Reserved At:</span>
+                  <span className="font-medium">
+                    {selectedTable.reservedAt.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+              )}
+            </div>
+            <DialogFooter className="sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDetailsDialogOpen(false)}
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Reservation Dialog */}
         <Dialog
