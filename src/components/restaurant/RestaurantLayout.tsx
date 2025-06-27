@@ -18,7 +18,12 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useAuditLog } from "@/contexts/AuditLogContext";
 import { useUser } from "@/contexts/UserContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -72,8 +77,6 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
     navigate("/login");
   };
 
-  const closeSidebar = () => setSidebarOpen(false);
-
   // Format date and time for European Balkan format with English day names
   const formatDateTime = (date: Date) => {
     const day = date.getDate().toString().padStart(2, "0");
@@ -112,20 +115,21 @@ export function RestaurantLayout({ children }: RestaurantLayoutProps) {
           const IconComponent = iconMap[item.icon as keyof typeof iconMap];
 
           return (
-            <Link
-              key={item.name}
-              to={item.href}
-              onClick={closeSidebar}
-              className={cn(
-                "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
-              )}
-            >
-              <IconComponent className="mr-3 h-5 w-5" />
-              {item.name}
-            </Link>
+            <SheetClose asChild>
+              <Link
+                key={item.name}
+                to={item.href}
+                className={cn(
+                  "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white",
+                )}
+              >
+                <IconComponent className="mr-3 h-5 w-5" />
+                {item.name}
+              </Link>
+            </SheetClose>
           );
         })}
       </nav>
